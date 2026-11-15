@@ -1,0 +1,54 @@
+name: Rulebook synchronisation
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Force a fresh import even when the document appears unchanged
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sr-rulebook-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out website
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Google API client
+        run: pip install google-api-python-client==2.177.0 google-auth==2.40.3
+      - name: Fetch and validate the Google Doc
+        env:
+          DOC_ID: "1PJbfJ5XwtrKbiE7gu8aqkdoXbWQZ07YqC4t8gB6kOQk"
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          FORCE_SYNC: ${{ github.event_name == 'workflow_dispatch' && inputs.force || 'false' }}
+        run: python scripts/sync_rulebook.py
+      - name: Publish only validated changes
+        run: |
+          if git diff --quiet -- standard-rulebook/rulebook-data.json standard-rulebook/rulebook-sync-status.json; then
+            echo "No changes to publish."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add standard-rulebook/rulebook-data.json standard-rulebook/rulebook-sync-status.json
+          git commit -m "Synchronise Standard Rulebook from Google Docs"
+          git push
