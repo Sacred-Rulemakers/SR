@@ -469,3 +469,16 @@ input::placeholder,textarea::placeholder{color:#7a827a;opacity:1}
 .forum-reaction:disabled{cursor:default;opacity:.65}
 .forum-reaction:focus-visible,.forum-text-action:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @media(max-width:560px){.forum-action-bar{align-items:flex-start;flex-direction:column;gap:8px}.forum-post-actions{gap:12px}.forum-reactions{width:100%;justify-content:flex-end}}
+
+
+/* Icon-only forum actions: transparent at rest, hover and active states. */
+.forum-action-bar{background:transparent;border-top:0;padding-top:8px}
+.forum-post-actions{background:transparent}
+.forum-icon-action,.forum-reaction{appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:5px;min-width:28px;min-height:28px;padding:3px;border:0;border-radius:0;background:transparent!important;box-shadow:none;color:var(--muted);cursor:pointer;transition:color .12s ease}
+.forum-icon-action:hover,.forum-icon-action:focus-visible,.forum-icon-action.is-danger:hover,.forum-reaction:hover,.forum-reaction.is-active{background:transparent!important;border:0;box-shadow:none;color:var(--green)}
+.forum-icon-action.is-danger{color:var(--danger-text)}
+.forum-action-icon{display:block;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.forum-reaction .forum-action-icon{width:15px;height:15px}
+.forum-reaction small{font-size:10px;line-height:1;color:inherit;font-variant-numeric:tabular-nums}
+.forum-icon-action:focus-visible,.forum-reaction:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media(max-width:560px){.forum-action-bar{align-items:flex-start;flex-direction:row;gap:8px}.forum-post-actions{gap:8px}.forum-reactions{width:auto;justify-content:flex-end}}
