@@ -48,7 +48,7 @@
 .forum-small{font-size:10px;color:var(--muted)}
 .forum-hidden{display:none!important}
 .forum-rules{font-size:12px;color:var(--muted);margin:0 0 16px}
-.forum-admin{margin-top:20px}
+.forum-admin{margin-top:20px}.forum-member-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}.forum-member-row:first-child{border-top:0}.forum-member-actions{display:flex;gap:6px;flex-wrap:wrap}
 @media(max-width:760px){.forum-shell{padding:0 17px 55px}.forum-layout{grid-template-columns:1fr}.forum-sidebar{padding:13px}.category-list{display:flex;overflow:auto}.category-btn{white-space:nowrap;width:auto}.forum-toolbar{align-items:stretch}.forum-search{max-width:none}.forum-card{padding:15px}.forum-detail-head{display:block}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
@@ -86,7 +86,7 @@
 </div>
 <div class="forum-layout">
 <aside class="forum-sidebar"><h2>Categories</h2><div id="categoryList" class="category-list"><div class="forum-small">Loading categories…</div></div>
-<div id="staffPanel" class="forum-admin forum-hidden"><h2>Moderation</h2><button class="forum-btn secondary" id="reportsButton" type="button">Open reports</button></div>
+<div id="staffPanel" class="forum-admin forum-hidden"><h2>Moderation</h2><button class="forum-btn secondary" id="reportsButton" type="button">Open reports</button><button class="forum-btn secondary" id="membersButton" type="button">Manage members</button></div>
 </aside>
 <section class="forum-content">
 <div id="mainView">
@@ -94,7 +94,7 @@
 </div>
 <div id="detailView" class="forum-hidden"></div>
 <div id="formView" class="forum-hidden"></div>
-<div id="reportView" class="forum-hidden"></div>
+<div id="reportView" class="forum-hidden"></div>\n<div id="membersView" class="forum-hidden"></div>
 </section>
 </div>
 </div>
@@ -112,9 +112,9 @@
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const dateText = value => new Intl.DateTimeFormat('en-GB',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value));
   const showMessage = (node, message, error=false) => { node.textContent=message; node.classList.remove('forum-hidden','error'); if(error) node.classList.add('error'); };
-  const hideViews = () => ['mainView','detailView','formView','reportView'].forEach(id => $(id).classList.add('forum-hidden'));
+  const hideViews = () => ['mainView','detailView','formView','reportView','membersView'].forEach(id => $(id).classList.add('forum-hidden'));
   const showMain = () => { hideViews(); $('mainView').classList.remove('forum-hidden'); };
-  const staff = () => profile && ['moderator','admin'].includes(profile.role);
+  const staff = () => profile && ['moderator','admin','owner'].includes(profile.role);
 
   function setAuthMode(mode) {
     authMode=mode;
@@ -150,7 +150,7 @@
   $('signOut').addEventListener('click',async()=>{await db.auth.signOut();});
   $('profileButton').addEventListener('click',()=>openProfileEditor());
   $('newThreadButton').addEventListener('click',()=>openThreadForm());
-  $('reportsButton').addEventListener('click',()=>loadReports());
+  $('reportsButton').addEventListener('click',()=>loadReports());\n  $('membersButton').addEventListener('click',()=>loadMembers());
 
   async function loadProfile() {
     if(!session) {profile=null;return;}
@@ -170,7 +170,7 @@
     if(session) {
       try { await loadProfile(); } catch(err) { console.error(err); }
       $('signedInName').textContent=profile?.display_name||session.user.email||'Member';
-      $('signedInRole').textContent=profile?.role==='member'?' · Member':' · '+(profile?.role||'');
+      $('signedInRole').textContent=' · '+(profile?.role||'Member');
       $('staffPanel').classList.toggle('forum-hidden',!staff());
     } else {
       profile=null;
@@ -291,6 +291,34 @@
       if(error){alert(error.message);return;}alert('Report submitted to the moderation team.');selectedThread?openThread(selectedThread.id):showMain();
     });
   }
+  async function loadMembers() {
+    if(!profile || !['admin','owner'].includes(profile.role)) return;
+    hideViews();$('membersView').classList.remove('forum-hidden');
+    $('membersView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeMembers" type="button">← Back</button><h2 style="margin-top:16px">Manage members</h2><p class="forum-rules">Administrators can promote members to moderator. The owner can appoint administrators as well.</p><div id="membersList">Loading members…</div></div>';
+    $('closeMembers').addEventListener('click',showMain);
+    const {data,error}=await db.from('forum_profiles').select('id,display_name,role').order('display_name');
+    if(error){$('membersList').textContent=error.message;return;}
+    const eligible=(data||[]).filter(p=>p.id!==session.user.id && (p.role==='member'||(profile.role==='owner'&&p.role==='moderator')));
+    $('membersList').innerHTML=(data||[]).map(p=>{
+      let actions='';
+      if(eligible.some(x=>x.id===p.id)){
+        if(profile.role==='owner'){
+          if(p.role==='member') actions='<button class="forum-btn secondary" data-promote="'+p.id+'" data-role="moderator" type="button">Make moderator</button><button class="forum-btn" data-promote="'+p.id+'" data-role="admin" type="button">Make administrator</button>';
+          else if(p.role==='moderator') actions='<button class="forum-btn" data-promote="'+p.id+'" data-role="admin" type="button">Make administrator</button>';
+        } else if(p.role==='member') actions='<button class="forum-btn secondary" data-promote="'+p.id+'" data-role="moderator" type="button">Make moderator</button>';
+      }
+      return '<div class="forum-member-row"><div><strong>'+escapeHtml(p.display_name)+'</strong><div class="forum-small">'+escapeHtml(p.role)+'</div></div><div class="forum-member-actions">'+actions+'</div></div>';
+    }).join('')||'<p class="forum-small">No members found.</p>';
+    $('membersList').querySelectorAll('[data-promote]').forEach(b=>b.addEventListener('click',async()=>{
+      const target=b.dataset.promote, role=b.dataset.role;
+      if(!confirm('Promote this member to '+role+'?')) return;
+      b.disabled=true;
+      const {error}=await db.rpc('promote_forum_member',{target_user_id:target,new_role:role});
+      if(error){alert(error.message);b.disabled=false;return;}
+      await loadMembers();
+    }));
+  }
+
   async function loadReports() {
     hideViews();$('reportView').classList.remove('forum-hidden');
     $('reportView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeReports" type="button">← Back</button><h2 style="margin-top:16px">Reports</h2><div id="reportsList">Loading reports…</div></div>';
