@@ -50,10 +50,42 @@ def document_paragraphs(document):
     if not body:
         yield from walk_tabs(document.get("tabs", []))
 
+def normalize_part_headings(lines):
+    raw = list(lines)
+    normalized = []
+    index = 0
+    while index < len(raw):
+        line = raw[index]
+        if line.upper() == "PART" and index + 1 < len(raw):
+            following = raw[index + 1]
+            if re.match(r"^(?:I|II|III|IV|V)\\s+[—–-]\\s*", following, re.I):
+                line = "PART " + following
+                index += 1
+
+        match = re.match(r"^(PART\\s+[IVXLCDM]+\\s+[—–-])(?:\\s+(.*))?$", line, re.I)
+        if match:
+            title = (match.group(2) or "").strip()
+            if index + 1 < len(raw):
+                following = raw[index + 1].strip()
+                is_uppercase_continuation = (
+                    following
+                    and following.upper() == following
+                    and re.search(r"[A-Z]", following)
+                    and not re.match(r"^(BOOK|PART|SECTION|RULE)\\b", following, re.I)
+                )
+                if is_uppercase_continuation:
+                    title = (title + " " + following).strip()
+                    index += 1
+            line = (match.group(1) + " " + title).strip()
+
+        normalized.append(line)
+        index += 1
+    return normalized
+
 def parse_rulebook(lines):
     books = []
     current_book = current_part = current_section = None
-    for line in lines:
+    for line in normalize_part_headings(lines):
         if BOOK_RE.match(line):
             current_book = {"title": line, "parts": []}
             books.append(current_book)
