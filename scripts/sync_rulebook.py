@@ -145,6 +145,15 @@ def main():
     lines = list(document_paragraphs(document))
     books, counts = parse_rulebook(lines)
 
+    certificate = next((line for line in lines if "This edition comprises" in line), None)
+    if certificate:
+        match = re.search(r"comprises\\s+(\\d+)\\s+numbered Rules arranged in\\s+(\\d+)\\s+Books,\\s+(\\d+)\\s+Parts and\\s+(\\d+)\\s+Sections", certificate, re.I)
+        if not match:
+            raise ValueError("The Rulebook certificate could not be read; refusing to publish.")
+        expected = {"rules": int(match.group(1)), "books": int(match.group(2)), "parts": int(match.group(3)), "sections": int(match.group(4))}
+        if expected != counts:
+            raise ValueError(f"Rulebook certificate says {expected['books']} Books, {expected['parts']} Parts, {expected['sections']} Sections and {expected['rules']} Rules, but the document headings contain {counts['books']} Books, {counts['parts']} Parts, {counts['sections']} Sections and {counts['rules']} Rules. Correct the source document before publishing.")
+
     existing = json.loads(DATA_PATH.read_text(encoding="utf-8")) if DATA_PATH.exists() else None
     if existing == books and not FORCE:
         print("No Rulebook content changes detected; keeping the current publication.")
