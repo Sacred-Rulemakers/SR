@@ -209,7 +209,7 @@
 
   async function loadThreads() {
     const query=$('searchInput').value.trim();
-    let req=db.from('forum_threads').select('id,category_id,author_id,title,body,thread_type,is_pinned,is_locked,created_at,updated_at,forum_categories(name),forum_profiles(display_name),forum_posts(count)').eq('is_deleted',false).order('is_pinned',{ascending:false}).order('updated_at',{ascending:false}).limit(100);
+    let req=db.from('forum_threads').select('id,category_id,author_id,title,body,thread_type,is_pinned,is_locked,created_at,updated_at,forum_categories(name),forum_profiles!forum_threads_author_id_fkey(display_name),forum_posts(count)').eq('is_deleted',false).order('is_pinned',{ascending:false}).order('updated_at',{ascending:false}).limit(100);
     if(query) req=req.ilike('title','%'+query.replace(/[%_]/g,'')+'%');
     const {data,error}=await req;
     if(error) { $('threadList').innerHTML='<div class="forum-empty">Unable to load discussions: '+escapeHtml(error.message)+'</div>';return; }
@@ -230,10 +230,10 @@
   $('searchInput').addEventListener('input',()=>loadThreads());
 
   async function openThread(id) {
-    const {data,error}=await db.from('forum_threads').select('*,forum_categories(name),forum_profiles(display_name)').eq('id',id).maybeSingle();
+    const {data,error}=await db.from('forum_threads').select('*,forum_categories(name),forum_profiles!forum_threads_author_id_fkey(display_name)').eq('id',id).maybeSingle();
     if(error||!data){alert(error?.message||'Discussion not found.');return;}
     selectedThread=data;
-    const {data:posts,error:postError}=await db.from('forum_posts').select('id,thread_id,author_id,parent_post_id,body,is_deleted,created_at,updated_at,forum_profiles(display_name)').eq('thread_id',id).order('created_at');
+    const {data:posts,error:postError}=await db.from('forum_posts').select('id,thread_id,author_id,parent_post_id,body,is_deleted,created_at,updated_at,forum_profiles!forum_threads_author_id_fkey(display_name)').eq('thread_id',id).order('created_at');
     if(postError){alert(postError.message);return;}
     const {data:reactions,error:reactionError}=await db.from('forum_post_reactions').select('post_id,user_id,reaction').in('post_id',(posts||[]).map(p=>p.id));
     if(reactionError){alert(reactionError.message);return;}
@@ -463,7 +463,7 @@
     hideViews();$('reportView').classList.remove('forum-hidden');
     $('reportView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeReports" type="button">← Back</button><h2 class="forum-view-title">Reports</h2><div id="reportsList">Loading reports…</div></div>';
     $('closeReports').addEventListener('click',showMain);
-    const {data,error}=await db.from('forum_reports').select('*,forum_profiles(display_name),forum_threads(title),forum_posts(body)').eq('status','open').order('created_at');
+    const {data,error}=await db.from('forum_reports').select('*,forum_profiles!forum_threads_author_id_fkey(display_name),forum_threads(title),forum_posts(body)').eq('status','open').order('created_at');
     if(error){$('reportsList').textContent=error.message;return;}
     $('reportsList').innerHTML=data.length?data.map(r=>'<article class="forum-post"><div class="forum-meta">Reported by '+escapeHtml(r.forum_profiles?.display_name||'Member')+' · '+dateText(r.created_at)+'</div><p class="forum-excerpt">'+escapeHtml(r.reason)+'</p><p class="forum-excerpt">Target: '+escapeHtml(r.forum_threads?.title||r.forum_posts?.body?.slice(0,150)||'Content')+'</p><button class="forum-btn secondary" data-dismiss="'+r.id+'">Mark reviewed</button><button class="forum-btn secondary" data-dismiss="'+r.id+'" data-dismiss-status="dismissed">Dismiss</button></article>').join(''):'<p class="forum-small">No open reports.</p>';
     $('reportsList').querySelectorAll('[data-dismiss]').forEach(b=>b.addEventListener('click',async()=>{const {error}=await db.from('forum_reports').update({status:b.dataset.dismissStatus||'reviewed'}).eq('id',b.dataset.dismiss);if(error)alert(error.message);else loadReports();}));
