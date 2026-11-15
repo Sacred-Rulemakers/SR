@@ -71,7 +71,7 @@
 <form id="authForm" class="forum-form">
 <label id="displayNameWrap" class="forum-hidden">Display name<input id="displayName" maxlength="32" minlength="2" autocomplete="nickname"></label>
 <label>Email address<input id="email" type="email" autocomplete="email" required></label>
-<label>Password<input id="password" type="password" minlength="8" autocomplete="current-password" required></label>
+<label>Password<input id="password" type="password" minlength="8" autocomplete="current-password" required><small id="passwordHint" class="forum-small forum-hidden">Use at least 8 characters, including a lowercase letter, an uppercase letter, a number and a symbol.</small></label>
 <button class="forum-btn" id="authSubmit" type="submit">Sign in</button>
 </form>
 <div id="authMessage" class="forum-status forum-hidden" role="status"></div>
@@ -94,7 +94,8 @@
 </div>
 <div id="detailView" class="forum-hidden"></div>
 <div id="formView" class="forum-hidden"></div>
-<div id="reportView" class="forum-hidden"></div>\n<div id="membersView" class="forum-hidden"></div>
+<div id="reportView" class="forum-hidden"></div>
+<div id="membersView" class="forum-hidden"></div>
 </section>
 </div>
 </div>
@@ -121,6 +122,8 @@
     $('authHeading').textContent=mode==='signin'?'Sign in to the forums':'Create a forum account';
     $('displayNameWrap').classList.toggle('forum-hidden',mode!=='signup');
     $('displayName').required=mode==='signup';
+    $('passwordHint').classList.toggle('forum-hidden',mode!=='signup');
+    $('password').autocomplete=mode==='signup'?'new-password':'current-password';
     $('authSubmit').textContent=mode==='signin'?'Sign in':'Create account';
     $('showSignIn').classList.toggle('secondary',mode!=='signin');
     $('showSignUp').classList.toggle('secondary',mode!=='signup');
@@ -150,7 +153,8 @@
   $('signOut').addEventListener('click',async()=>{await db.auth.signOut();});
   $('profileButton').addEventListener('click',()=>openProfileEditor());
   $('newThreadButton').addEventListener('click',()=>openThreadForm());
-  $('reportsButton').addEventListener('click',()=>loadReports());\n  $('membersButton').addEventListener('click',()=>loadMembers());
+  $('reportsButton').addEventListener('click',()=>loadReports());
+  $('membersButton').addEventListener('click',()=>loadMembers());
 
   async function loadProfile() {
     if(!session) {profile=null;return;}
@@ -171,7 +175,8 @@
       try { await loadProfile(); } catch(err) { console.error(err); }
       $('signedInName').textContent=profile?.display_name||session.user.email||'Member';
       $('signedInRole').textContent=' · '+(profile?.role||'Member');
-      $('staffPanel').classList.toggle('forum-hidden',!staff());\n      $('membersButton').classList.toggle('forum-hidden',!['admin','owner'].includes(profile?.role));
+      $('staffPanel').classList.toggle('forum-hidden',!staff());
+      $('membersButton').classList.toggle('forum-hidden',!['admin','owner'].includes(profile?.role));
     } else {
       profile=null;
       $('staffPanel').classList.add('forum-hidden');
