@@ -6,66 +6,6 @@
 <meta name="description" content="Public discussion spaces of the Sacred Rulemakers.">
 <title>Forums — The Sacred Rulemakers</title>
 <link rel="stylesheet" href="../assets/sr.css">
-<style>
-.forum-shell{max-width:var(--content);margin:auto;padding:0 26px 72px}
-.forum-toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:28px 0 18px}
-.forum-toolbar input,.forum-form input,.forum-form textarea,.forum-form select,.forum-search{font:inherit;color:var(--ink);background:var(--white);border:1px solid var(--line);padding:12px 13px;width:100%;min-width:0}
-.forum-search{max-width:340px}
-.forum-btn{border:1px solid var(--gold);background:var(--gold);color:#1d2a22;padding:11px 16px;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
-.forum-btn.secondary{background:transparent;color:var(--green);border-color:var(--line)}
-.forum-btn.danger{background:#7b3831;color:white;border-color:#7b3831}
-.forum-btn:disabled{opacity:.5;cursor:not-allowed}
-.forum-layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:26px;align-items:start}
-.forum-sidebar,.forum-panel,.forum-card{background:var(--white);border:1px solid var(--line)}
-.forum-sidebar{padding:17px}
-.forum-sidebar h2,.forum-panel h2{font:400 22px var(--serif);color:var(--green);margin:0 0 12px}
-.category-list{display:grid;gap:5px}
-.category-btn{width:100%;text-align:left;padding:9px 10px;border:0;background:transparent;color:var(--ink);font:inherit;font-size:12px;cursor:pointer}
-.category-btn[aria-pressed=true]{background:#eeece3;color:var(--green);font-weight:700}
-.forum-content{min-width:0}
-.forum-card{padding:18px 20px;margin-bottom:10px}
-.forum-card h3{font:400 21px/1.3 var(--serif);color:var(--green);margin:0 0 7px}
-.forum-card h3 button{all:unset;cursor:pointer}
-.forum-card h3 button:hover{text-decoration:underline}
-.forum-meta{font-size:11px;color:var(--muted)}
-.forum-excerpt{font-size:13px;color:#4e584f;margin:10px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
-.forum-empty{padding:28px;background:#eeece3;color:var(--muted);font-size:13px}
-.forum-form{display:grid;gap:12px}
-.forum-form label{display:grid;gap:5px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
-.forum-form textarea{min-height:150px;resize:vertical}
-.forum-auth{max-width:540px;margin:0 auto 28px}
-.forum-auth .forum-panel{padding:22px}
-.forum-auth-tabs{display:flex;gap:8px;margin-bottom:16px}
-.forum-auth-tabs button{flex:1}
-.forum-status{padding:11px 13px;background:#eeece3;color:#4d594e;font-size:12px;margin:12px 0}
-.forum-status.error{background:#f3e8e5;color:#773b32}
-.forum-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.forum-detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
-.forum-post{border-top:1px solid var(--line);padding:17px 0}
-.forum-post:first-child{border-top:0}
-.forum-post-body{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.7;margin:12px 0}
-.forum-post-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.forum-small{font-size:10px;color:var(--muted)}
-.forum-hidden{display:none!important}
-.forum-rules{font-size:12px;color:var(--muted);margin:0 0 16px}
-.forum-admin{margin-top:20px}.forum-member-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}.forum-member-row:first-child{border-top:0}.forum-member-actions{display:flex;gap:6px;flex-wrap:wrap}
-.forum-member-row{cursor:pointer}.forum-member-row:hover{background:#f6f4ed}
-.forum-member-main{display:flex;align-items:center;gap:12px;min-width:0}
-.forum-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#e8e5da;display:grid;place-items:center;color:var(--green);font-weight:700;flex:0 0 auto}
-.forum-avatar.large{width:76px;height:76px;font-size:24px}
-.member-profile-head{display:flex;align-items:center;gap:17px;margin:18px 0}
-.member-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:18px 0}
-.member-stat{padding:14px;background:#f1efe7;border:1px solid var(--line)}
-.member-stat strong{display:block;font:400 24px var(--serif);color:var(--green)}
-.member-stat span{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
-.member-role-control{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0}
-.member-role-control select{font:inherit;padding:10px;border:1px solid var(--line);background:white;color:var(--ink)}
-.member-presence{font-size:11px;color:var(--muted)}
-.member-presence.online{color:#34704a}
-@media(max-width:520px){.member-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.member-profile-head{align-items:flex-start}}
-
-@media(max-width:760px){.forum-shell{padding:0 17px 55px}.forum-layout{grid-template-columns:1fr}.forum-sidebar{padding:13px}.category-list{display:flex;overflow:auto}.category-btn{white-space:nowrap;width:auto}.forum-toolbar{align-items:stretch}.forum-search{max-width:none}.forum-card{padding:15px}.forum-detail-head{display:block}}
-</style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
 </head>
 <body>
@@ -251,7 +191,7 @@
       const category=t.forum_categories?.name||'Discussion';
       const author=t.forum_profiles?.display_name||'Member';
       const count=t.forum_posts?.[0]?.count||0;
-      return '<article class="forum-card"><div class="forum-meta">'+escapeHtml(category)+' · '+escapeHtml(author)+' · '+dateText(t.created_at)+(t.is_pinned?' · PINNED':'')+(t.is_locked?' · LOCKED':'')+'</div><h3><button type="button" data-open="'+t.id+'">'+escapeHtml(t.title)+'</button></h3><p class="forum-excerpt">'+escapeHtml(t.body.slice(0,240))+(t.body.length>240?'…':'')+'</p><div class="forum-meta" style="margin-top:12px">'+count+' replies · Updated '+dateText(t.updated_at)+'</div></article>';
+      return '<article class="forum-card"><div class="forum-meta">'+escapeHtml(category)+' · '+escapeHtml(author)+' · '+dateText(t.created_at)+(t.is_pinned?' · PINNED':'')+(t.is_locked?' · LOCKED':'')+'</div><h3><button type="button" data-open="'+t.id+'">'+escapeHtml(t.title)+'</button></h3><p class="forum-excerpt">'+escapeHtml(t.body.slice(0,240))+(t.body.length>240?'…':'')+'</p><div class="forum-meta forum-replies-meta">'+count+' replies · Updated '+dateText(t.updated_at)+'</div></article>';
     }).join('');
     $('threadList').querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openThread(b.dataset.open)));
   }
@@ -266,12 +206,12 @@
     const {data:reactions,error:reactionError}=await db.from('forum_post_reactions').select('post_id,user_id,reaction').in('post_id',(posts||[]).map(p=>p.id));
     if(reactionError){alert(reactionError.message);return;}
     const reactionRows=reactions||[];
-    const renderPost=(p,depth=0)=>'<article class="forum-post" style="margin-left:'+Math.min(depth,4)*18+'px"><div class="forum-meta">'+escapeHtml(p.forum_profiles?.display_name||'Member')+' · '+dateText(p.created_at)+'</div><div class="forum-post-body">'+(p.is_deleted?'[This reply has been removed.]':escapeHtml(p.body))+'</div><div class="forum-post-actions">'+(session&&!p.is_deleted?'<button class="forum-btn secondary" data-reply-post="'+p.id+'">Reply</button>':'')+(session&&session.user.id===p.author_id&&!p.is_deleted?'<button class="forum-btn secondary" data-edit-post="'+p.id+'">Edit</button>':'')+(session&&!p.is_deleted?'<button class="forum-btn secondary" data-report-post="'+p.id+'">Report</button>':'')+(staff()&&!p.is_deleted?'<button class="forum-btn danger" data-hide-post="'+p.id+'">Remove</button>':'')+['like','agree','thanks'].map(kind=>{const rows=reactionRows.filter(x=>x.post_id===p.id&&x.reaction===kind);const mine=session&&rows.some(x=>x.user_id===session.user.id);return '<button class="forum-btn secondary" data-react-post="'+p.id+'" data-reaction="'+kind+'">'+({like:'Like',agree:'Agree',thanks:'Thanks'}[kind])+' · '+rows.length+(mine?' ✓':'')+'</button>';}).join('')+'</div><div id="reply-box-'+p.id+'"></div>'+(posts.filter(x=>x.parent_post_id===p.id).map(child=>renderPost(child,depth+1)).join(''))+'</article>';
+    const renderPost=(p,depth=0)=>'<article class="forum-post" style="--reply-offset:'+Math.min(depth,4)*18+'px"><div class="forum-meta">'+escapeHtml(p.forum_profiles?.display_name||'Member')+' · '+dateText(p.created_at)+'</div><div class="forum-post-body">'+(p.is_deleted?'[This reply has been removed.]':escapeHtml(p.body))+'</div><div class="forum-post-actions">'+(session&&!p.is_deleted?'<button class="forum-btn secondary" data-reply-post="'+p.id+'">Reply</button>':'')+(session&&session.user.id===p.author_id&&!p.is_deleted?'<button class="forum-btn secondary" data-edit-post="'+p.id+'">Edit</button>':'')+(session&&!p.is_deleted?'<button class="forum-btn secondary" data-report-post="'+p.id+'">Report</button>':'')+(staff()&&!p.is_deleted?'<button class="forum-btn danger" data-hide-post="'+p.id+'">Remove</button>':'')+['like','agree','thanks'].map(kind=>{const rows=reactionRows.filter(x=>x.post_id===p.id&&x.reaction===kind);const mine=session&&rows.some(x=>x.user_id===session.user.id);return '<button class="forum-btn secondary" data-react-post="'+p.id+'" data-reaction="'+kind+'">'+({like:'Like',agree:'Agree',thanks:'Thanks'}[kind])+' · '+rows.length+(mine?' ✓':'')+'</button>';}).join('')+'</div><div id="reply-box-'+p.id+'"></div>'+(posts.filter(x=>x.parent_post_id===p.id).map(child=>renderPost(child,depth+1)).join(''))+'</article>';
     hideViews();$('detailView').classList.remove('forum-hidden');
     const own=session&&session.user.id===data.author_id;
     const canEdit=own||staff();
     $('detailView').innerHTML=
-      '<div class="forum-card"><button class="forum-btn secondary" id="backToThreads" type="button">← All discussions</button><div class="forum-detail-head" style="margin-top:17px"><div><div class="forum-meta">'+escapeHtml(data.forum_categories?.name||'')+' · '+escapeHtml(data.forum_profiles?.display_name||'Member')+' · '+dateText(data.created_at)+'</div><h2 style="font:400 29px/1.25 var(--serif);color:var(--green);margin:8px 0">'+escapeHtml(data.title)+'</h2></div></div><div class="forum-post-body">'+escapeHtml(data.body)+'</div><div class="forum-post-actions">'+(canEdit?'<button class="forum-btn secondary" id="editThread">Edit</button>':'')+(session?'<button class="forum-btn secondary" id="reportThread">Report</button>':'')+(staff()?'<button class="forum-btn secondary" id="toggleLock">'+(data.is_locked?'Unlock':'Lock')+'</button><button class="forum-btn secondary" id="togglePin">'+(data.is_pinned?'Unpin':'Pin')+'</button><button class="forum-btn danger" id="hideThread">Remove</button>':'')+'</div></div>'+
+      '<div class="forum-card"><button class="forum-btn secondary" id="backToThreads" type="button">← All discussions</button><div class="forum-detail-head forum-detail-intro"><div><div class="forum-meta">'+escapeHtml(data.forum_categories?.name||'')+' · '+escapeHtml(data.forum_profiles?.display_name||'Member')+' · '+dateText(data.created_at)+'</div><h2 class="forum-detail-title">'+escapeHtml(data.title)+'</h2></div></div><div class="forum-post-body">'+escapeHtml(data.body)+'</div><div class="forum-post-actions">'+(canEdit?'<button class="forum-btn secondary" id="editThread">Edit</button>':'')+(session?'<button class="forum-btn secondary" id="reportThread">Report</button>':'')+(staff()?'<button class="forum-btn secondary" id="toggleLock">'+(data.is_locked?'Unlock':'Lock')+'</button><button class="forum-btn secondary" id="togglePin">'+(data.is_pinned?'Unpin':'Pin')+'</button><button class="forum-btn danger" id="hideThread">Remove</button>':'')+'</div></div>'+
       '<div class="forum-card"><h2>Replies ('+posts.length+')</h2><div id="postsList">'+(posts.length?posts.filter(p=>!p.parent_post_id).map(p=>renderPost(p)).join(''):'<p class="forum-small">No replies yet.</p>')+'</div></div>'+
       (session&&!data.is_locked&&!data.is_deleted?'<div class="forum-card"><h2>Write a reply</h2><form id="replyForm" class="forum-form"><label>Your reply<textarea id="replyBody" maxlength="8000" required></textarea></label><button class="forum-btn" type="submit">Post reply</button></form></div>':data.is_locked?'<div class="forum-empty">This discussion is locked. New replies are closed.</div>':'');
     $('backToThreads').addEventListener('click',showMain);
@@ -322,7 +262,7 @@
   function openThreadForm(thread=null) {
     if(!session){alert('Sign in to start a discussion.');return;}
     hideViews();$('formView').classList.remove('forum-hidden');
-    $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelForm" type="button">← Cancel</button><h2 style="margin-top:16px">'+(thread?'Edit discussion':'Start a discussion')+'</h2><form id="threadForm" class="forum-form"><label>Category<select id="threadCategory" required>'+categories.map(c=>'<option value="'+c.id+'" '+(thread?.category_id===c.id?'selected':'')+'>'+escapeHtml(c.name)+'</option>').join('')+'</select></label><label>Title<input id="threadTitle" maxlength="120" minlength="4" required value="'+escapeHtml(thread?.title||'')+'"></label><label>Message<textarea id="threadBody" maxlength="12000" required>'+escapeHtml(thread?.body||'')+'</textarea></label><button class="forum-btn" type="submit">'+(thread?'Save changes':'Publish discussion')+'</button></form></div>';
+    $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelForm" type="button">← Cancel</button><h2 class="forum-view-title">'+(thread?'Edit discussion':'Start a discussion')+'</h2><form id="threadForm" class="forum-form"><label>Category<select id="threadCategory" required>'+categories.map(c=>'<option value="'+c.id+'" '+(thread?.category_id===c.id?'selected':'')+'>'+escapeHtml(c.name)+'</option>').join('')+'</select></label><label>Title<input id="threadTitle" maxlength="120" minlength="4" required value="'+escapeHtml(thread?.title||'')+'"></label><label>Message<textarea id="threadBody" maxlength="12000" required>'+escapeHtml(thread?.body||'')+'</textarea></label><button class="forum-btn" type="submit">'+(thread?'Save changes':'Publish discussion')+'</button></form></div>';
     $('cancelForm').addEventListener('click',()=>thread?openThread(thread.id):showMain());
     $('threadForm').addEventListener('submit',async e=>{
       e.preventDefault();
@@ -335,7 +275,7 @@
   function openProfileEditor() {
     if(!profile)return;
     hideViews();$('formView').classList.remove('forum-hidden');
-    $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelProfile" type="button">← Cancel</button><h2 style="margin-top:16px">Your profile</h2><form id="profileForm" class="forum-form"><label>Display name<input id="profileName" minlength="2" maxlength="32" required value="'+escapeHtml(profile.display_name)+'"></label><label>Avatar image URL<input id="profileAvatar" type="url" maxlength="500" value="'+escapeHtml(profile.avatar_url||'')+'" placeholder="https://…"></label><label>Short bio<textarea id="profileBio" maxlength="240">'+escapeHtml(profile.bio||'')+'</textarea></label><button class="forum-btn" type="submit">Save profile</button></form></div>';
+    $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelProfile" type="button">← Cancel</button><h2 class="forum-view-title">Your profile</h2><form id="profileForm" class="forum-form"><label>Display name<input id="profileName" minlength="2" maxlength="32" required value="'+escapeHtml(profile.display_name)+'"></label><label>Avatar image URL<input id="profileAvatar" type="url" maxlength="500" value="'+escapeHtml(profile.avatar_url||'')+'" placeholder="https://…"></label><label>Short bio<textarea id="profileBio" maxlength="240">'+escapeHtml(profile.bio||'')+'</textarea></label><button class="forum-btn" type="submit">Save profile</button></form></div>';
     $('cancelProfile').addEventListener('click',showMain);
     $('profileForm').addEventListener('submit',async e=>{
       e.preventDefault();
@@ -351,7 +291,7 @@
   function openReport(target) {
     if(!session){alert('Sign in to report content.');return;}
     hideViews();$('reportView').classList.remove('forum-hidden');
-    $('reportView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelReport" type="button">← Cancel</button><h2 style="margin-top:16px">Report content</h2><form id="reportForm" class="forum-form"><label>Reason<textarea id="reportReason" minlength="8" maxlength="1000" required placeholder="Explain the issue for the moderators."></textarea></label><button class="forum-btn" type="submit">Submit report</button></form></div>';
+    $('reportView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelReport" type="button">← Cancel</button><h2 class="forum-view-title">Report content</h2><form id="reportForm" class="forum-form"><label>Reason<textarea id="reportReason" minlength="8" maxlength="1000" required placeholder="Explain the issue for the moderators."></textarea></label><button class="forum-btn" type="submit">Submit report</button></form></div>';
     $('cancelReport').addEventListener('click',()=>selectedThread?openThread(selectedThread.id):showMain());
     $('reportForm').addEventListener('submit',async e=>{
       e.preventDefault();const {error}=await db.from('forum_reports').insert({reporter_id:session.user.id,...target,reason:$('reportReason').value.trim()});
@@ -361,7 +301,7 @@
   async function loadMembers() {
     if(!profile || !['admin','owner'].includes(profile.role)) return;
     hideViews();$('membersView').classList.remove('forum-hidden');
-    $('membersView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeMembers" type="button">← Back</button><h2 style="margin-top:16px">Member directory</h2><p class="forum-rules">Select a registered account to inspect its profile, activity and contribution record. Presence is updated automatically while a member has the forums open.</p><div id="membersList">Loading members…</div></div>';
+    $('membersView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeMembers" type="button">← Back</button><h2 class="forum-view-title">Member directory</h2><p class="forum-rules">Select a registered account to inspect its profile, activity and contribution record. Presence is updated automatically while a member has the forums open.</p><div id="membersList">Loading members…</div></div>';
     $('closeMembers').addEventListener('click',showMain);
     const {data,error}=await db.from('forum_profiles').select('id,display_name,role,created_at').order('display_name');
     if(error){$('membersList').textContent=error.message;return;}
@@ -377,7 +317,7 @@
     $('membersList').innerHTML=members.map(p=>{
       const online=p.last_seen_at && (Date.now()-new Date(p.last_seen_at).getTime()<5*60*1000);
       const avatar=p.avatar_url?'<img class="forum-avatar" src="'+escapeHtml(p.avatar_url)+'" alt="">':'<div class="forum-avatar">'+escapeHtml((p.display_name||'?').slice(0,1).toUpperCase())+'</div>';
-      return '<button type="button" data-member="'+p.id+'" class="forum-member-row" style="width:100%;text-align:left;background:transparent;color:inherit;border:0"><div class="forum-member-main">'+avatar+'<div><strong>'+escapeHtml(p.display_name)+'</strong><div class="forum-small">'+escapeHtml(p.role)+' · <span class="member-presence '+(online?'online':'')+'">'+(online?'Online':'Last active '+(p.last_seen_at?dateText(p.last_seen_at):'Not recorded'))+'</span></div></div></div><span class="forum-small">View profile →</span></button>';
+      return '<button type="button" data-member="'+p.id+'" class="forum-member-row"><div class="forum-member-main">'+avatar+'<div><strong>'+escapeHtml(p.display_name)+'</strong><div class="forum-small">'+escapeHtml(p.role)+' · <span class="member-presence '+(online?'online':'')+'">'+(online?'Online':'Last active '+(p.last_seen_at?dateText(p.last_seen_at):'Not recorded'))+'</span></div></div></div><span class="forum-small">View profile →</span></button>';
     }).join('')||'<div class="forum-empty">No registered members yet.</div>';
     $('membersList').querySelectorAll('[data-member]').forEach(b=>b.addEventListener('click',()=>openMemberProfile(b.dataset.member,members)));
   }
@@ -417,7 +357,7 @@
         roleControl='<p class="forum-small">Administrators cannot change the role of another administrator or the owner.</p>';
       }
       $('memberDetail').className='';
-      $('memberDetail').innerHTML='<div class="member-profile-head">'+avatar+'<div><h2 style="margin:0 0 5px">'+escapeHtml(member.display_name)+'</h2><div class="forum-meta">'+escapeHtml(member.role)+' · Joined '+dateText(member.created_at)+'</div><div class="member-presence '+(online?'online':'')+'">'+(online?'Online now':(member.last_seen_at?'Last active '+dateText(member.last_seen_at):'Activity not recorded'))+'</div></div></div><p class="forum-excerpt">'+(member.bio?escapeHtml(member.bio):'<span class="forum-small">No biography provided.</span>')+'</p>'+roleControl+'<h3 style="font:400 20px var(--serif);color:var(--green);margin:22px 0 8px">Contribution record</h3><div class="member-stats"><div class="member-stat"><strong>'+threads+'</strong><span>Discussions opened</span></div><div class="member-stat"><strong>'+replies+'</strong><span>Replies written</span></div><div class="member-stat"><strong>'+totals.like+'</strong><span>Likes received</span></div><div class="member-stat"><strong>'+totals.agree+'</strong><span>Agreements received</span></div><div class="member-stat"><strong>'+totals.thanks+'</strong><span>Thanks received</span></div><div class="member-stat"><strong>'+given+'</strong><span>Reactions given</span></div></div>';
+      $('memberDetail').innerHTML='<div class="member-profile-head">'+avatar+'<div><h2 class="member-profile-name">'+escapeHtml(member.display_name)+'</h2><div class="forum-meta">'+escapeHtml(member.role)+' · Joined '+dateText(member.created_at)+'</div><div class="member-presence '+(online?'online':'')+'">'+(online?'Online now':(member.last_seen_at?'Last active '+dateText(member.last_seen_at):'Activity not recorded'))+'</div></div></div><p class="forum-excerpt">'+(member.bio?escapeHtml(member.bio):'<span class="forum-small">No biography provided.</span>')+'</p>'+roleControl+'<h3 class="member-contribution-title">Contribution record</h3><div class="member-stats"><div class="member-stat"><strong>'+threads+'</strong><span>Discussions opened</span></div><div class="member-stat"><strong>'+replies+'</strong><span>Replies written</span></div><div class="member-stat"><strong>'+totals.like+'</strong><span>Likes received</span></div><div class="member-stat"><strong>'+totals.agree+'</strong><span>Agreements received</span></div><div class="member-stat"><strong>'+totals.thanks+'</strong><span>Thanks received</span></div><div class="member-stat"><strong>'+given+'</strong><span>Reactions given</span></div></div>';
       if($('saveMemberRole')) $('saveMemberRole').addEventListener('click',async()=>{
         const newRole=$('memberRole').value;
         if(newRole===member.role)return;
@@ -437,7 +377,7 @@
 
   async function loadReports() {
     hideViews();$('reportView').classList.remove('forum-hidden');
-    $('reportView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeReports" type="button">← Back</button><h2 style="margin-top:16px">Reports</h2><div id="reportsList">Loading reports…</div></div>';
+    $('reportView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeReports" type="button">← Back</button><h2 class="forum-view-title">Reports</h2><div id="reportsList">Loading reports…</div></div>';
     $('closeReports').addEventListener('click',showMain);
     const {data,error}=await db.from('forum_reports').select('*,forum_profiles(display_name),forum_threads(title),forum_posts(body)').eq('status','open').order('created_at');
     if(error){$('reportsList').textContent=error.message;return;}
