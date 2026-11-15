@@ -60,7 +60,7 @@ def normalize_part_headings(lines):
         line = raw[index]
         if line.upper() == "PART" and index + 1 < len(raw):
             following = raw[index + 1]
-            if re.match(r"^[IVXLCDM]+\\s+[—–-]\\s*", following, re.I):
+            if re.match(r"^[IVXLCDM]+\s+[—–-]\s*", following, re.I):
                 line = "PART " + following
                 index += 1
 
