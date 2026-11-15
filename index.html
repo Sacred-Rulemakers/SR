@@ -1,7 +1,18 @@
 <!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#20352b"><meta name="description" content="The official home of the Sacred Rulemakers: the Standard Rulebook, Requests, Forums and SR departments.">
-<title>SR — The Sacred Rulemakers</title><link rel="stylesheet" href="assets/sr.css"></head>
+<meta name="theme-color" content="#20352b"><meta name="description" content="The official home of the Sacred Rulemakers. Access the institution's publications, public spaces, services and information.">
+<title>Home — The Sacred Rulemakers</title><link rel="stylesheet" href="assets/sr.css">
+<style>
+.home-intro{max-width:760px;padding:70px 0 45px}
+.home-intro h1{font:400 clamp(43px,7vw,68px)/1.08 var(--serif);color:var(--green);margin:13px 0 16px}
+.home-intro p{max-width:680px;font:18px/1.7 var(--serif);color:#566057;margin:0}
+.home-directory{padding:0 0 76px}
+.home-directory .section-heading{margin-bottom:22px}
+.home-directory .directory-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.home-directory .directory-card{min-height:190px;padding:23px}
+@media(max-width:900px){.home-directory .directory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.home-intro{padding:49px 0 34px}.home-intro p{font-size:16px}.home-directory .directory-grid{grid-template-columns:1fr}.home-directory .directory-card{min-height:155px}}
+</style></head>
 <body><div class="gold-rule"></div>
 <header class="site-header"><div class="head">
   <a class="brand" href="/SR/" aria-label="The Sacred Rulemakers home"><span class="mark">SR</span><span class="brand-name">THE SACRED RULEMAKERS</span></a>
@@ -12,36 +23,23 @@
   </nav>
 </div></header>
 <main>
-  <section class="home-hero"><div class="wrap">
-    <div class="eyebrow">Promulgated by the Sacred Rulemakers</div>
-    <h1>A rule for everything.<br>And everything by rule.</h1>
-    <p>The official home of the SR: consult its governing instrument, explore the institution and find the offices responsible for its public work.</p>
-    <div class="actions"><a class="button" href="/SR/standard-rulebook/">Read the Rulebook</a><a class="button alt" href="#departments">Explore the SR</a></div>
-  </div></section>
-  <div class="wrap"><div class="stats" aria-label="Rulebook at a glance">
-    <div class="stat"><strong>15</strong><span>Books</span></div>
-    <div class="stat"><strong>34</strong><span>Parts</span></div>
-    <div class="stat"><strong>77</strong><span>Sections</span></div>
-    <div class="stat"><strong>770</strong><span>Numbered Rules</span></div>
-  </div></div>
-  <section class="content-section"><div class="wrap">
-    <div class="section-heading"><div><div class="kicker">The governing instrument</div><h2>The Standard Rulebook</h2></div><p>Browse the complete collection by Book, or enter the reader to search all 770 numbered provisions.</p></div>
-    <div class="book-grid" id="bookGrid"></div>
-    <div class="section-action"><a class="text-link" href="/SR/standard-rulebook/">Open the complete Rulebook →</a></div>
-  </div></section>
-  <section class="content-section tinted" id="departments"><div class="wrap">
-    <div class="section-heading"><div><div class="kicker">The institution</div><h2>SR departments and resources</h2></div><p>Public discussion, formal requests and the offices responsible for the work of the SR.</p></div>
+  <section class="wrap home-intro">
+    <div class="eyebrow">THE SACRED RULEMAKERS · OFFICIAL WEBSITE</div>
+    <h1>Welcome to the SR.</h1>
+    <p>The official directory of the Sacred Rulemakers. From here, access the institution's publications, public spaces, services and information.</p>
+  </section>
+  <section class="home-directory"><div class="wrap">
+    <div class="section-heading"><div><div class="kicker">DIRECTORY</div><h2>Explore the SR</h2></div><p>Select an area of the institution to continue.</p></div>
     <div class="directory-grid">
-      <a class="directory-card" href="/SR/forums/"><span class="number">01 / PUBLIC DISCUSSION</span><h3>Forums</h3><p>Discussion spaces and public correspondence of the SR.</p><span class="open">Visit Forums →</span></a>
-      <a class="directory-card" href="/SR/requests/"><span class="number">02 / REQUESTS OFFICE</span><h3>Requests</h3><p>Formal requests concerning the Standard Rulebook and its provisions.</p><span class="open">View Requests →</span></a>
-      <a class="directory-card" href="/SR/management/"><span class="number">03 / ADMINISTRATION</span><h3>Management</h3><p>Administrative resources, governance and management.</p><span class="open">Open Management →</span></a>
-      <a class="directory-card" href="/SR/about/"><span class="number">04 / INSTITUTION</span><h3>The SR</h3><p>Institutional information, structure and official notices.</p><span class="open">About the SR →</span></a>
+      <a class="directory-card" href="/SR/standard-rulebook/"><span class="number">01 / PUBLICATION</span><h3>Standard Rulebook</h3><p>The official collection of rules, arranged into Books, Parts and Sections.</p><span class="open">Open Rulebook →</span></a>
+      <a class="directory-card" href="/SR/forums/"><span class="number">02 / PUBLIC DISCUSSION</span><h3>Forums</h3><p>Discussion spaces and public correspondence of the SR.</p><span class="open">Visit Forums →</span></a>
+      <a class="directory-card" href="/SR/requests/"><span class="number">03 / SUBMISSIONS</span><h3>Requests</h3><p>Formal requests concerning the Rulebook and the institution.</p><span class="open">View Requests →</span></a>
+      <a class="directory-card" href="/SR/legal/"><span class="number">04 / GOVERNANCE</span><h3>Legal</h3><p>Legal notices, terms and the formal status of SR publications.</p><span class="open">View Legal →</span></a>
+      <a class="directory-card" href="/SR/access-and-data/"><span class="number">05 / INFORMATION</span><h3>Access and Data</h3><p>Information about access, data handling and site accessibility.</p><span class="open">View Access and Data →</span></a>
+      <a class="directory-card" href="/SR/management/"><span class="number">06 / ADMINISTRATION</span><h3>Management</h3><p>Administrative resources, governance and management.</p><span class="open">Open Management →</span></a>
+      <a class="directory-card" href="/SR/about/"><span class="number">07 / INSTITUTION</span><h3>About the SR</h3><p>Institutional information, structure and official notices.</p><span class="open">About the SR →</span></a>
     </div>
   </div></section>
-</main><footer class="site-footer"><div class="wrap"><span>THE SACRED RULEMAKERS · OFFICIAL WEBSITE</span><small><a href="/SR/">Return to Home</a></small></div></footer>
-<script id="book-directory-data" type="application/json">[{"index":0,"title":"MEASUREMENT AND QUANTITY","parts":2,"sections":5,"rules":50},{"index":1,"title":"DIRECTION, POSITION AND DISTANCE","parts":2,"sections":5,"rules":50},{"index":2,"title":"TIME AND CALENDAR","parts":2,"sections":5,"rules":50},{"index":3,"title":"THE SKY, WEATHER AND CELESTIAL MATTERS","parts":2,"sections":5,"rules":50},{"index":4,"title":"PERSONS, MEMBERSHIP AND CONDUCT","parts":2,"sections":5,"rules":50},{"index":5,"title":"FOOD, DRINK AND CONSUMPTION","parts":3,"sections":8,"rules":80},{"index":6,"title":"ANIMALS, PLANTS AND OTHER LIFE","parts":2,"sections":5,"rules":50},{"index":7,"title":"PROPERTY, OBJECTS AND MATERIALS","parts":3,"sections":5,"rules":50},{"index":8,"title":"LANGUAGE, SIGNS AND COMMUNICATION","parts":1,"sections":5,"rules":50},{"index":9,"title":"AUTHORITY, ADMINISTRATION AND FINAL PROVISIONS","parts":4,"sections":9,"rules":90},{"index":10,"title":"THE MIND AND THE EXERCISE OF REASON","parts":2,"sections":4,"rules":40},{"index":11,"title":"THE PERSON AND SOCIAL CONDUCT","parts":2,"sections":4,"rules":40},{"index":12,"title":"THE BODY, HEALTH AND DAILY EXISTENCE","parts":2,"sections":4,"rules":40},{"index":13,"title":"LEARNING, WORK AND ECONOMIC AFFAIRS","parts":2,"sections":3,"rules":30},{"index":14,"title":"SOCIETY, PUBLIC ORDER AND THE NATURAL WORLD","parts":3,"sections":5,"rules":50}]</script>
-<script>
-const books=JSON.parse(document.getElementById('book-directory-data').textContent);
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-document.getElementById('bookGrid').innerHTML=books.map(b=>'<a class="book-card" href="/SR/standard-rulebook/?book='+b.index+'"><span class="number">BOOK '+String(b.index+1).padStart(2,'0')+'</span><h3>'+esc(b.title)+'</h3><p>'+b.parts+' Parts · '+b.sections+' Sections · '+b.rules+' Rules</p></a>').join('');
-</script></body></html>
+</main>
+<footer class="site-footer"><div class="wrap"><span>THE SACRED RULEMAKERS · OFFICIAL WEBSITE</span><small><a href="/SR/">Return to Home</a></small></div></footer>
+</body></html>
