@@ -1,45 +1,7 @@
 <!doctype html>
 <html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#20352b"><meta name="description" content="Search and browse the complete Standard Rulebook of the Sacred Rulemakers, containing 15 Books and 770 numbered Rules.">
-<title>The Standard Rulebook — SR</title><link rel="stylesheet" href="../assets/sr.css"><style>
-.reader-page{padding:39px 0 66px}
-.readerhead{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}
-.readerhead h1{font:400 40px/1.2 var(--serif);color:var(--green);margin:5px 0}
-.readerhead p{color:var(--muted);margin:0;font-size:13px}
-.search{width:min(380px,100%);min-height:44px;padding:11px 12px;border:1px solid var(--line);background:var(--white);color:var(--ink);font:14px var(--sans)}
-.layout{display:grid;grid-template-columns:260px minmax(0,1fr);gap:22px;align-items:start}
-.sidebar{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;background:var(--white);border:1px solid var(--line);padding:16px}
-.sideheading{font-size:10px;letter-spacing:2px;color:#947c4b;text-transform:uppercase;margin-bottom:12px}
-.sidebook{padding:10px 0;border-top:1px solid var(--line)}
-.sidebook button{border:0;background:none;padding:0;text-align:left;font:14px/1.4 var(--serif);cursor:pointer;color:var(--ink)}
-.sidebook small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
-.sidesecs{padding:7px 0 0 8px;display:grid;gap:5px}
-.sidesecs a{font-size:10px;color:var(--muted);text-decoration:none}
-.sidesecs a:hover{color:var(--green);text-decoration:underline}
-.readerbanner{background:var(--green);color:white;padding:25px 28px;margin-bottom:18px}
-.readerbanner h2{font:400 30px/1.25 var(--serif);margin:5px 0}
-.readerbanner p{font-size:12px;color:#d5ddd5;margin:0}
-.meta{font-size:11px;color:var(--muted);margin:12px 0}
-.syncbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:-8px 0 18px;padding:10px 12px;border:1px solid var(--line);background:var(--white);font-size:11px;color:var(--muted)}
-.syncbar button{border:1px solid var(--gold);background:var(--gold);color:#20352b;padding:8px 12px;font:700 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
-.syncbar button:disabled{opacity:.5;cursor:wait}
-.parttitle{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#927b4d;border-bottom:1px solid var(--line);padding-bottom:9px;margin:26px 0 17px}
-.sectiontitle{font:400 24px/1.3 var(--serif);color:var(--green);margin:0 0 12px}
-.rule{display:grid;grid-template-columns:72px minmax(0,1fr) auto;gap:12px;align-items:start;padding:13px 14px;margin:7px 0;background:var(--white);border:1px solid var(--line)}
-.rnum{font:12px var(--serif);color:#947c4b;padding-top:2px}
-.rtext{font:15px/1.6 var(--serif);overflow-wrap:anywhere}
-.rbuttons{display:flex;gap:5px}
-.rbuttons button,.pager button{min-height:34px;background:transparent;border:1px solid var(--line);padding:5px 8px;font:11px var(--sans);color:var(--muted);cursor:pointer}
-.rbuttons button:hover,.pager button:not(:disabled):hover{border-color:var(--gold);color:var(--green)}
-.rbuttons button.saved{border-color:var(--gold);color:#765f31}
-.pager{display:flex;align-items:center;gap:12px;margin-top:20px;flex-wrap:wrap}
-.pager button{padding:8px 13px;background:var(--white)}
-.pager button:disabled{opacity:.35;cursor:not-allowed}
-.empty{background:var(--white);border:1px solid var(--line);padding:24px;color:var(--muted)}
-@media(max-width:780px){.layout{grid-template-columns:1fr}.sidebar{position:relative;top:auto;max-height:280px}.readerhead{align-items:flex-start;flex-direction:column}.search{width:100%}}
-@media(max-width:500px){.reader-page{padding-top:30px}.readerhead h1{font-size:34px}.rule{grid-template-columns:54px minmax(0,1fr)}.rbuttons{grid-column:2}.readerbanner{padding:21px}}
-@media print{.gold-rule,.site-header,.sidebar,.search,.rbuttons,.pager,.site-footer{display:none!important}.layout{display:block}.rule{break-inside:avoid;border:0;border-bottom:1px solid #ddd}}
-</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script></head>
+<title>The Standard Rulebook — SR</title><link rel="stylesheet" href="../assets/sr.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script></head>
 <body><div class="gold-rule"></div>
 <header class="site-header"><div class="head">
   <a class="brand" href="/SR/" aria-label="The Sacred Rulemakers home"><span class="mark">SR</span><span class="brand-name">THE SACRED RULEMAKERS</span></a>
