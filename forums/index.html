@@ -49,6 +49,21 @@
 .forum-hidden{display:none!important}
 .forum-rules{font-size:12px;color:var(--muted);margin:0 0 16px}
 .forum-admin{margin-top:20px}.forum-member-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}.forum-member-row:first-child{border-top:0}.forum-member-actions{display:flex;gap:6px;flex-wrap:wrap}
+.forum-member-row{cursor:pointer}.forum-member-row:hover{background:#f6f4ed}
+.forum-member-main{display:flex;align-items:center;gap:12px;min-width:0}
+.forum-avatar{width:42px;height:42px;border-radius:50%;object-fit:cover;background:#e8e5da;display:grid;place-items:center;color:var(--green);font-weight:700;flex:0 0 auto}
+.forum-avatar.large{width:76px;height:76px;font-size:24px}
+.member-profile-head{display:flex;align-items:center;gap:17px;margin:18px 0}
+.member-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:18px 0}
+.member-stat{padding:14px;background:#f1efe7;border:1px solid var(--line)}
+.member-stat strong{display:block;font:400 24px var(--serif);color:var(--green)}
+.member-stat span{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.member-role-control{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0}
+.member-role-control select{font:inherit;padding:10px;border:1px solid var(--line);background:white;color:var(--ink)}
+.member-presence{font-size:11px;color:var(--muted)}
+.member-presence.online{color:#34704a}
+@media(max-width:520px){.member-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.member-profile-head{align-items:flex-start}}
+
 @media(max-width:760px){.forum-shell{padding:0 17px 55px}.forum-layout{grid-template-columns:1fr}.forum-sidebar{padding:13px}.category-list{display:flex;overflow:auto}.category-btn{white-space:nowrap;width:auto}.forum-toolbar{align-items:stretch}.forum-search{max-width:none}.forum-card{padding:15px}.forum-detail-head{display:block}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
@@ -107,7 +122,7 @@
   const SUPABASE_KEY = 'sb_publishable_tOa5vCq1dLb-Jv20PZ5FCg_epzAMLPO';
   const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   const $ = id => document.getElementById(id);
-  let session = null, profile = null, categories = [], activeCategory = 'all';
+  let session = null, profile = null, categories = [], activeCategory = 'all', presenceTimer = null;
   let authMode = 'signin', selectedThread = null, threadCache = [];
 
   const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -158,7 +173,7 @@
 
   async function loadProfile() {
     if(!session) {profile=null;return;}
-    const {data,error}=await db.from('forum_profiles').select('id,display_name,bio,role').eq('id',session.user.id).maybeSingle();
+    const {data,error}=await db.from('forum_profiles').select('id,display_name,bio,role,avatar_url,last_seen_at,created_at').eq('id',session.user.id).maybeSingle();
     if(error) throw error;
     profile=data;
   }
@@ -172,7 +187,8 @@
     $('signedInBar').classList.toggle('forum-hidden',!session);
     $('newThreadButton').classList.toggle('forum-hidden',!session);
     if(session) {
-      try { await loadProfile(); } catch(err) { console.error(err); }
+      try { await loadProfile(); await markActive(); } catch(err) { console.error(err); }
+      if(!presenceTimer) presenceTimer=setInterval(()=>{if(session && !document.hidden) markActive();},60000);
       $('signedInName').textContent=profile?.display_name||session.user.email||'Member';
       $('signedInRole').textContent=' · '+(profile?.role||'Member');
       $('staffPanel').classList.toggle('forum-hidden',!staff());
@@ -183,6 +199,15 @@
     }
   }
   db.auth.onAuthStateChange((_event,newSession)=>{session=newSession;setTimeout(async()=>{await syncAuthUI();},0);});
+  async function markActive() {
+    if(!session) return;
+    const {error}=await db.from('forum_profiles').update({last_seen_at:new Date().toISOString()}).eq('id',session.user.id);
+    if(error) console.warn('Presence update failed:',error.message);
+    else if(profile) profile.last_seen_at=new Date().toISOString();
+  }
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden) markActive();});
+  window.addEventListener('focus',()=>markActive());
+
 
   async function loadCategories() {
     const {data,error}=await db.from('forum_categories').select('id,slug,name,description,sort_order').order('sort_order');
@@ -295,10 +320,10 @@
   function openProfileEditor() {
     if(!profile)return;
     hideViews();$('formView').classList.remove('forum-hidden');
-    $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelProfile" type="button">← Cancel</button><h2 style="margin-top:16px">Your profile</h2><form id="profileForm" class="forum-form"><label>Display name<input id="profileName" minlength="2" maxlength="32" required value="'+escapeHtml(profile.display_name)+'"></label><label>Short bio<textarea id="profileBio" maxlength="240">'+escapeHtml(profile.bio||'')+'</textarea></label><button class="forum-btn" type="submit">Save profile</button></form></div>';
+    $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelProfile" type="button">← Cancel</button><h2 style="margin-top:16px">Your profile</h2><form id="profileForm" class="forum-form"><label>Display name<input id="profileName" minlength="2" maxlength="32" required value="'+escapeHtml(profile.display_name)+'"></label><label>Avatar image URL<input id="profileAvatar" type="url" maxlength="500" value="'+escapeHtml(profile.avatar_url||'')+'" placeholder="https://…"></label><label>Short bio<textarea id="profileBio" maxlength="240">'+escapeHtml(profile.bio||'')+'</textarea></label><button class="forum-btn" type="submit">Save profile</button></form></div>';
     $('cancelProfile').addEventListener('click',showMain);
     $('profileForm').addEventListener('submit',async e=>{
-      e.preventDefault();const {error}=await db.from('forum_profiles').update({display_name:$('profileName').value.trim(),bio:$('profileBio').value.trim()}).eq('id',session.user.id);
+      e.preventDefault();const {error}=await db.from('forum_profiles').update({display_name:$('profileName').value.trim(),bio:$('profileBio').value.trim(),avatar_url:$('profileAvatar').value.trim()||null}).eq('id',session.user.id);
       if(error){alert(error.message);return;}await loadProfile();await syncAuthUI();showMain();
     });
   }
@@ -315,29 +340,68 @@
   async function loadMembers() {
     if(!profile || !['admin','owner'].includes(profile.role)) return;
     hideViews();$('membersView').classList.remove('forum-hidden');
-    $('membersView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeMembers" type="button">← Back</button><h2 style="margin-top:16px">Manage members</h2><p class="forum-rules">Administrators can promote members to moderator. The owner can appoint administrators as well.</p><div id="membersList">Loading members…</div></div>';
+    $('membersView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeMembers" type="button">← Back</button><h2 style="margin-top:16px">Member directory</h2><p class="forum-rules">Select a registered account to inspect its profile, activity and contribution record. Presence is updated automatically while a member has the forums open.</p><div id="membersList">Loading members…</div></div>';
     $('closeMembers').addEventListener('click',showMain);
-    const {data,error}=await db.from('forum_profiles').select('id,display_name,role').order('display_name');
+    const {data,error}=await db.from('forum_profiles').select('id,display_name,bio,role,avatar_url,last_seen_at,created_at').order('display_name');
     if(error){$('membersList').textContent=error.message;return;}
-    const eligible=(data||[]).filter(p=>p.id!==session.user.id && (p.role==='member'||(profile.role==='owner'&&p.role==='moderator')));
-    $('membersList').innerHTML=(data||[]).map(p=>{
-      let actions='';
-      if(eligible.some(x=>x.id===p.id)){
-        if(profile.role==='owner'){
-          if(p.role==='member') actions='<button class="forum-btn secondary" data-promote="'+p.id+'" data-role="moderator" type="button">Make moderator</button><button class="forum-btn" data-promote="'+p.id+'" data-role="admin" type="button">Make administrator</button>';
-          else if(p.role==='moderator') actions='<button class="forum-btn" data-promote="'+p.id+'" data-role="admin" type="button">Make administrator</button>';
-        } else if(p.role==='member') actions='<button class="forum-btn secondary" data-promote="'+p.id+'" data-role="moderator" type="button">Make moderator</button>';
+    const members=data||[];
+    $('membersList').innerHTML=members.map(p=>{
+      const online=p.last_seen_at && (Date.now()-new Date(p.last_seen_at).getTime()<5*60*1000);
+      const avatar=p.avatar_url?'<img class="forum-avatar" src="'+escapeHtml(p.avatar_url)+'" alt="">':'<div class="forum-avatar">'+escapeHtml((p.display_name||'?').slice(0,1).toUpperCase())+'</div>';
+      return '<button type="button" data-member="'+p.id+'" class="forum-member-row" style="width:100%;text-align:left;background:transparent;color:inherit;border:0"><div class="forum-member-main">'+avatar+'<div><strong>'+escapeHtml(p.display_name)+'</strong><div class="forum-small">'+escapeHtml(p.role)+' · <span class="member-presence '+(online?'online':'')+'">'+(online?'Online':'Last active '+(p.last_seen_at?dateText(p.last_seen_at):'Not recorded'))+'</span></div></div></div><span class="forum-small">View profile →</span></button>';
+    }).join('')||'<div class="forum-empty">No registered members yet.</div>';
+    $('membersList').querySelectorAll('[data-member]').forEach(b=>b.addEventListener('click',()=>openMemberProfile(b.dataset.member,members)));
+  }
+
+  async function openMemberProfile(id,members) {
+    const member=members.find(p=>p.id===id);
+    if(!member)return;
+    $('membersView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="backToMembers" type="button">← All members</button><div id="memberDetail" class="forum-empty">Loading member profile…</div></div>';
+    $('backToMembers').addEventListener('click',()=>loadMembers());
+    const count = async (table,column) => {
+      const {count,error}=await db.from(table).select('id',{count:'exact',head:true}).eq(column,id);
+      if(error) throw error;
+      return count||0;
+    };
+    try {
+      const [threads,replies,given,receivedRows] = await Promise.all([
+        count('forum_threads','author_id'),
+        count('forum_posts','author_id'),
+        count('forum_post_reactions','user_id'),
+        db.from('forum_post_reactions').select('reaction,forum_posts!inner(author_id)').eq('forum_posts.author_id',id)
+      ]);
+      if(receivedRows.error) throw receivedRows.error;
+      const received=receivedRows.data||[];
+      const totals={like:0,agree:0,thanks:0};
+      received.forEach(r=>{if(Object.prototype.hasOwnProperty.call(totals,r.reaction))totals[r.reaction]++;});
+      const online=member.last_seen_at && (Date.now()-new Date(member.last_seen_at).getTime()<5*60*1000);
+      const avatar=member.avatar_url?'<img class="forum-avatar large" src="'+escapeHtml(member.avatar_url)+'" alt="">':'<div class="forum-avatar large">'+escapeHtml((member.display_name||'?').slice(0,1).toUpperCase())+'</div>';
+      let roleControl='';
+      if(member.id!==session.user.id && (profile.role==='owner'||!['owner','admin'].includes(member.role))) {
+        const roles=profile.role==='owner'?['owner','admin','moderator','member']:['moderator','member'];
+        roleControl='<div class="member-role-control"><label for="memberRole">Account role</label><select id="memberRole">'+roles.map(r=>'<option value="'+r+'" '+(member.role===r?'selected':'')+'>'+r.charAt(0).toUpperCase()+r.slice(1)+'</option>').join('')+'</select><button class="forum-btn" id="saveMemberRole" type="button">Save role</button></div>';
+      } else if(member.id===session.user.id) {
+        roleControl='<p class="forum-small">Your own role cannot be changed here.</p>';
+      } else {
+        roleControl='<p class="forum-small">Administrators cannot change the role of another administrator or the owner.</p>';
       }
-      return '<div class="forum-member-row"><div><strong>'+escapeHtml(p.display_name)+'</strong><div class="forum-small">'+escapeHtml(p.role)+'</div></div><div class="forum-member-actions">'+actions+'</div></div>';
-    }).join('')||'<p class="forum-small">No members found.</p>';
-    $('membersList').querySelectorAll('[data-promote]').forEach(b=>b.addEventListener('click',async()=>{
-      const target=b.dataset.promote, role=b.dataset.role;
-      if(!confirm('Promote this member to '+role+'?')) return;
-      b.disabled=true;
-      const {error}=await db.rpc('promote_forum_member',{target_user_id:target,new_role:role});
-      if(error){alert(error.message);b.disabled=false;return;}
-      await loadMembers();
-    }));
+      $('memberDetail').className='';
+      $('memberDetail').innerHTML='<div class="member-profile-head">'+avatar+'<div><h2 style="margin:0 0 5px">'+escapeHtml(member.display_name)+'</h2><div class="forum-meta">'+escapeHtml(member.role)+' · Joined '+dateText(member.created_at)+'</div><div class="member-presence '+(online?'online':'')+'">'+(online?'Online now':(member.last_seen_at?'Last active '+dateText(member.last_seen_at):'Activity not recorded'))+'</div></div></div><p class="forum-excerpt">'+(member.bio?escapeHtml(member.bio):'<span class="forum-small">No biography provided.</span>')+'</p>'+roleControl+'<h3 style="font:400 20px var(--serif);color:var(--green);margin:22px 0 8px">Contribution record</h3><div class="member-stats"><div class="member-stat"><strong>'+threads+'</strong><span>Discussions opened</span></div><div class="member-stat"><strong>'+replies+'</strong><span>Replies written</span></div><div class="member-stat"><strong>'+totals.like+'</strong><span>Likes received</span></div><div class="member-stat"><strong>'+totals.agree+'</strong><span>Agreements received</span></div><div class="member-stat"><strong>'+totals.thanks+'</strong><span>Thanks received</span></div><div class="member-stat"><strong>'+given+'</strong><span>Reactions given</span></div></div>';
+      if($('saveMemberRole')) $('saveMemberRole').addEventListener('click',async()=>{
+        const newRole=$('memberRole').value;
+        if(newRole===member.role)return;
+        if(!confirm('Change '+member.display_name+' from '+member.role+' to '+newRole+'?'))return;
+        $('saveMemberRole').disabled=true;
+        const {error}=await db.rpc('set_forum_member_role',{target_user_id:id,new_role:newRole});
+        if(error){alert(error.message);$('saveMemberRole').disabled=false;return;}
+        member.role=newRole;
+        await syncAuthUI();
+        await openMemberProfile(id,members);
+      });
+    } catch(err) {
+      $('memberDetail').className='forum-status error';
+      $('memberDetail').textContent='Unable to load contribution statistics: '+err.message;
+    }
   }
 
   async function loadReports() {
