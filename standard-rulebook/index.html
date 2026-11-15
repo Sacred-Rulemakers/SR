@@ -60,6 +60,8 @@
 (async()=>{
 const BOOKS=await fetch('./rulebook-data.json?ts='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('Rulebook data could not be loaded');return r.json()});
 const ALL=BOOKS.flatMap((b,bi)=>b.parts.flatMap((p,pi)=>p.sections.flatMap((s,si)=>s.rules.map(text=>({text,book:bi,part:pi,section:si,num:+text.match(/^Rule (\d+)/)[1]})))));
+const totalRules=BOOKS.reduce((n,b)=>n+b.parts.reduce((m,p)=>m+p.sections.reduce((k,s)=>k+s.rules.length,0),0),0);
+document.querySelector('.readerhead p').textContent='Promulgated by the Sacred Rulemakers · '+totalRules+' Rules';
 const SIZE=50,$=id=>document.getElementById(id),slug=x=>x.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/,'');
 const esc=x=>String(x).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const initialBook=new URLSearchParams(location.search).get('book');
@@ -96,7 +98,7 @@ function render(){
   const list=ALL.filter(r=>(selected<0||r.book===selected)&&(!term||r.text.toLowerCase().includes(term)||String(r.num).includes(term.replace(/^0+/,''))));
   const slice=list.slice(page*SIZE,(page+1)*SIZE);
   $('readerTitle').textContent=term?'Search results':selected<0?'All Books':BOOKS[selected].title;
-  $('readerDesc').textContent=selected<0?'Browse all 770 numbered provisions.':BOOKS[selected].parts.length+' Parts · '+BOOKS[selected].parts.reduce((n,p)=>n+p.sections.length,0)+' Sections';
+  $('readerDesc').textContent=selected<0?'Browse all '+totalRules+' numbered provisions.':BOOKS[selected].parts.length+' Parts · '+BOOKS[selected].parts.reduce((n,p)=>n+p.sections.length,0)+' Sections';
   $('meta').textContent=list.length?'Showing '+(page*SIZE+1)+'–'+Math.min((page+1)*SIZE,list.length)+' of '+list.length+' Rules':'No provisions match this search.';
   if(!slice.length)$('ruleContent').innerHTML='<div class="empty">No rules found. Try another term.</div>';
   else if(term)$('ruleContent').innerHTML=slice.map(rule).join('');
