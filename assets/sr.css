@@ -418,3 +418,14 @@ input::placeholder,textarea::placeholder{color:#7a827a;opacity:1}
 .rule{break-inside:avoid;border:0;border-bottom:1px solid #ddd}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important;animation:none!important}}
+
+
+/* Forum interaction refinements */
+.forum-icon-action{border-radius:2px;transition:background-color .12s,color .12s,border-color .12s}
+.forum-icon-action:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.forum-post-actions .forum-btn{min-height:28px;padding:4px 7px;font-size:10px}
+.forum-create-actions .forum-btn{min-height:38px;padding:9px 12px}
+.forum-sidebar-list{min-width:0}
+.participant-picker input[type=search]{width:100%}
+.participant-option{cursor:pointer}
+.participant-option input{accent-color:var(--green)}
