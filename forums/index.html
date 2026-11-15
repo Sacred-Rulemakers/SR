@@ -193,7 +193,7 @@
       db.from('forum_threads').select('id,author_id,title,updated_at').eq('author_id',session.user.id).eq('is_deleted',false),
       db.from('forum_thread_participants').select('thread_id').eq('user_id',session.user.id),
       db.from('forum_posts').select('thread_id').eq('author_id',session.user.id).eq('is_deleted',false),
-      db.from('forum_drafts').select('id,title,updated_at,thread_type').eq('author_id',session.user.id).order('updated_at',{ascending:false})
+      db.from('forum_drafts').select('id,title,body,updated_at,thread_type,included_user_ids,included_roles,is_public').eq('author_id',session.user.id).order('updated_at',{ascending:false})
     ]);
     if(mineError||memberError||postsError||draftError){$('yourDiscussions').innerHTML='<div class="forum-small">Unable to load your discussions.</div>';return;}
     const ids=[...new Set([...(mine||[]).map(t=>t.id),...(members||[]).map(t=>t.thread_id),...(myPosts||[]).map(t=>t.thread_id)])];
@@ -297,6 +297,8 @@
     if(type==='announcement'&&!canAnnounce()){alert('Only moderators, administrators and owners can announce.');return;}
     const selectedType=thread?.thread_type||draft?.thread_type||type;
     let selectedUsers=draft?.included_user_ids||[];
+    let includedRoles=[...(thread?.included_roles||draft?.included_roles||[])];
+    let isPublic=!!(thread?.is_public??draft?.is_public);
     if(thread){
       const {data}=await db.from('forum_thread_participants').select('user_id').eq('thread_id',thread.id);
       selectedUsers=(data||[]).map(x=>x.user_id);
@@ -306,25 +308,31 @@
     participantProfiles=people||[];
     hideViews();$('formView').classList.remove('forum-hidden');
     const types={discussion:'Open discussion',help:'Seek help',feature:'Propose features',announcement:'Announce'};
-    $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelForm" type="button">← Cancel</button><h2 class="forum-view-title">'+(thread?'Edit discussion':draft?'Continue draft':types[selectedType])+'</h2><form id="threadForm" class="forum-form"><label>Title<input id="threadTitle" maxlength="120" minlength="4" required value="'+escapeHtml(thread?.title||draft?.title||'')+'"></label><label>Message<textarea id="threadBody" maxlength="12000" required>'+escapeHtml(thread?.body||draft?.body||'')+'</textarea></label><section class="participant-picker"><h3>Who to include</h3><p class="forum-small">Choose individual members, search by name, or select a role group.</p><div class="participant-presets"><button type="button" class="forum-btn secondary" data-role-preset="owner">Owners</button><button type="button" class="forum-btn secondary" data-role-preset="admin">Admins</button><button type="button" class="forum-btn secondary" data-role-preset="moderator">Moderators</button><button type="button" class="forum-btn secondary" data-role-preset="all">All</button><button type="button" class="forum-btn secondary" id="clearParticipants">Clear</button></div><input id="participantSearch" type="search" placeholder="Search members…" aria-label="Search members"><div id="participantResults" class="participant-results"></div><div class="forum-small" id="participantCount"></div></section><div class="forum-row forum-form-actions">'+(draft?'<button class="forum-btn secondary" id="deleteDraft" type="button">Delete draft</button>':'')+'<button class="forum-btn secondary" id="saveDraft" type="button">Save as draft</button><button class="forum-btn" type="submit">'+(thread?'Save changes':'Publish')+'</button></div></form></div>';
+    $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelForm" type="button">← Cancel</button><h2 class="forum-view-title">'+(thread?'Edit discussion':draft?'Continue draft':types[selectedType])+'</h2><form id="threadForm" class="forum-form"><label>Title<input id="threadTitle" maxlength="120" minlength="4" required value="'+escapeHtml(thread?.title||draft?.title||'')+'"></label><label>Message<textarea id="threadBody" maxlength="12000" required>'+escapeHtml(thread?.body||draft?.body||'')+'</textarea></label><section class="participant-picker"><h3>Who to include</h3><p class="forum-small">Choose individual members, search by name, or select a role group.</p><div class="participant-presets"><button type="button" class="forum-btn secondary" data-role-preset="owner">Owners</button><button type="button" class="forum-btn secondary" data-role-preset="admin">Admins</button><button type="button" class="forum-btn secondary" data-role-preset="moderator">Moderators</button><button type="button" class="forum-btn secondary" data-role-preset="public" aria-pressed="'+(isPublic?'true':'false')+'">Public</button><button type="button" class="forum-btn secondary" id="clearParticipants">Clear</button></div><input id="participantSearch" type="search" placeholder="Search members…" aria-label="Search members"><div id="participantResults" class="participant-results"></div><div class="forum-small" id="participantCount"></div></section><div class="forum-row forum-form-actions">'+(draft?'<button class="forum-btn secondary" id="deleteDraft" type="button">Delete draft</button>':'')+'<button class="forum-btn secondary" id="saveDraft" type="button">Save as draft</button><button class="forum-btn" type="submit">'+(thread?'Save changes':'Publish')+'</button></div></form></div>';
     const selected=new Set(selectedUsers);
     const drawPeople=()=>{
       const q=$('participantSearch').value.trim().toLowerCase();
-      const shown=participantProfiles.filter(p=>!q||p.display_name.toLowerCase().includes(q));
-      $('participantResults').innerHTML=shown.map(p=>'<label class="participant-option"><input type="checkbox" data-person="'+p.id+'" '+(selected.has(p.id)?'checked':'')+'><span>'+escapeHtml(p.display_name)+'</span><small>'+escapeHtml(p.role)+'</small></label>').join('')||'<div class="forum-small">No members match that search.</div>';
-      $('participantResults').querySelectorAll('[data-person]').forEach(input=>input.addEventListener('change',()=>{input.checked?selected.add(input.dataset.person):selected.delete(input.dataset.person);updateCount();}));
+      const shown=q?participantProfiles.filter(p=>p.display_name.toLowerCase().includes(q)):[];
+      $('participantResults').innerHTML=!q?'<div class="forum-small">Search by name to find individual members.</div>':shown.map(p=>'<label class="participant-option"><input type="checkbox" data-person="'+p.id+'" '+(selected.has(p.id)?'checked':'')+'><span>'+escapeHtml(p.display_name)+'</span><small>'+escapeHtml(p.role)+'</small></label>').join('')||'<div class="forum-small">No members match that search.</div>';
+      $('participantResults').querySelectorAll('[data-person]').forEach(input=>input.addEventListener('change',()=>{if(input.checked){isPublic=false;selected.add(input.dataset.person);}else selected.delete(input.dataset.person);updateCount();}));
       updateCount();
     };
-    const updateCount=()=>{$('participantCount').textContent=selected.size+' member'+(selected.size===1?'':'s')+' selected';};
+    const updateCount=()=>{
+      const groups=includedRoles.map(r=>({owner:'Owners',admin:'Admins',moderator:'Moderators'}[r]||r));
+      $('participantCount').textContent=isPublic?'Public · everyone, including future members':selected.size+' individual'+(selected.size===1?'':'s')+(groups.length?' · '+groups.join(', '):'')+' selected';
+      const publicButton=document.querySelector('[data-role-preset="public"]');
+      if(publicButton)publicButton.setAttribute('aria-pressed',String(isPublic));
+    };
     drawPeople();
     $('participantSearch').addEventListener('input',drawPeople);
     document.querySelectorAll('[data-role-preset]').forEach(b=>b.addEventListener('click',()=>{
       const role=b.dataset.rolePreset;
-      if(role==='all')participantProfiles.forEach(p=>selected.add(p.id));
-      else participantProfiles.filter(p=>p.role===role).forEach(p=>selected.add(p.id));
+      if(role==='public'){isPublic=!isPublic;if(isPublic){selected.clear();includedRoles=[];}drawPeople();return;}
+      isPublic=false;
+      includedRoles=includedRoles.includes(role)?includedRoles.filter(x=>x!==role):[...includedRoles,role];
       drawPeople();
     }));
-    $('clearParticipants').addEventListener('click',()=>{selected.clear();drawPeople();});
+    $('clearParticipants').addEventListener('click',()=>{selected.clear();includedRoles=[];isPublic=false;drawPeople();});
     $('cancelForm').addEventListener('click',()=>thread?openThread(thread.id):showMain());
     if($('deleteDraft'))$('deleteDraft').addEventListener('click',async()=>{
       if(!confirm('Delete this draft?'))return;
@@ -332,13 +340,13 @@
       if(error){alert(error.message);return;}await loadPersonalLists();showMain();
     });
     $('saveDraft').addEventListener('click',async()=>{
-      const values={author_id:session.user.id,thread_type:selectedType,title:$('threadTitle').value.trim(),body:$('threadBody').value.trim(),included_user_ids:[...selected],updated_at:new Date().toISOString()};
+      const values={author_id:session.user.id,thread_type:selectedType,title:$('threadTitle').value.trim(),body:$('threadBody').value.trim(),included_user_ids:[...selected],included_roles:includedRoles,is_public:isPublic,updated_at:new Date().toISOString()};
       const result=draft?await db.from('forum_drafts').update(values).eq('id',draft.id):await db.from('forum_drafts').insert(values);
       if(result.error){alert(result.error.message);return;}await loadPersonalLists();showMain();
     });
     $('threadForm').addEventListener('submit',async e=>{
       e.preventDefault();
-      const values={category_id:generalCategoryId,thread_type:selectedType,title:$('threadTitle').value.trim(),body:$('threadBody').value.trim()};
+      const values={category_id:generalCategoryId,thread_type:selectedType,title:$('threadTitle').value.trim(),body:$('threadBody').value.trim(),included_roles:includedRoles,is_public:isPublic};
       if(!values.category_id){alert('The General category is not configured.');return;}
       const result=thread?await db.from('forum_threads').update(values).eq('id',thread.id):await db.from('forum_threads').insert({...values,author_id:session.user.id}).select('id').single();
       if(result.error){alert(result.error.message);return;}
