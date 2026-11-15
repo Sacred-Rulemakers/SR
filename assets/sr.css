@@ -482,3 +482,13 @@ input::placeholder,textarea::placeholder{color:#7a827a;opacity:1}
 .forum-reaction small{font-size:10px;line-height:1;color:inherit;font-variant-numeric:tabular-nums}
 .forum-icon-action:focus-visible,.forum-reaction:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @media(max-width:560px){.forum-action-bar{align-items:flex-start;flex-direction:row;gap:8px}.forum-post-actions{gap:8px}.forum-reactions{width:auto;justify-content:flex-end}}
+
+/* Member avatars in discussion lists and conversation threads */
+.forum-thread-author,.forum-post-author{display:flex;align-items:center;gap:10px;min-width:0}
+.forum-thread-author{margin:0 0 10px}
+.forum-post-author{margin-bottom:8px}
+.forum-avatar{width:34px;height:34px;flex:0 0 34px;border-radius:50%;object-fit:cover;display:inline-flex;align-items:center;justify-content:center;background:#e8e5da;color:var(--green);font:600 13px/1 var(--sans)}
+.forum-avatar-fallback{border:1px solid var(--line)}
+.forum-detail-intro .forum-thread-author{margin-bottom:8px}
+.forum-detail-intro .forum-avatar{width:40px;height:40px;flex-basis:40px}
+.forum-post-author .forum-meta{min-width:0}
