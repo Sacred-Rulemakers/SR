@@ -358,15 +358,17 @@
     if(!member)return;
     $('membersView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="backToMembers" type="button">← All members</button><div id="memberDetail" class="forum-empty">Loading member profile…</div></div>';
     $('backToMembers').addEventListener('click',()=>loadMembers());
-    const count = async (table,column) => {
-      const {count,error}=await db.from(table).select('id',{count:'exact',head:true}).eq(column,id);
+    const count = async (table,column,onlyVisible=false) => {
+      let query=db.from(table).select('id',{count:'exact',head:true}).eq(column,id);
+      if(onlyVisible) query=query.eq('is_deleted',false);
+      const {count,error}=await query;
       if(error) throw error;
       return count||0;
     };
     try {
       const [threads,replies,given,receivedRows] = await Promise.all([
-        count('forum_threads','author_id'),
-        count('forum_posts','author_id'),
+        count('forum_threads','author_id',true),
+        count('forum_posts','author_id',true),
         count('forum_post_reactions','user_id'),
         db.from('forum_post_reactions').select('reaction,forum_posts!inner(author_id)').eq('forum_posts.author_id',id)
       ]);
