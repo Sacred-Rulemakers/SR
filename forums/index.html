@@ -182,10 +182,14 @@
 
   async function loadProfile() {
     if(!session) {profile=null;return;}
-    const {data,error}=await db.from('forum_profiles').select('id,display_name,bio,role,avatar_url,last_seen_at,created_at').eq('id',session.user.id).maybeSingle();
+    const {data,error}=await db.from('forum_profiles').select('id,display_name,role,created_at').eq('id',session.user.id).maybeSingle();
     if(error) throw error;
-    profile=data;
+    if(!data) { profile=null; return; }
+    const {data:details,error:detailsError}=await db.from('forum_member_details').select('bio,avatar_url,last_seen_at').eq('user_id',session.user.id).maybeSingle();
+    if(detailsError) throw detailsError;
+    profile={...data,...(details||{bio:'',avatar_url:null,last_seen_at:null})};
   }
+
   async function refreshAuth() {
     const {data}=await db.auth.getSession();
     session=data.session;
@@ -210,10 +214,12 @@
   db.auth.onAuthStateChange((_event,newSession)=>{session=newSession;setTimeout(async()=>{await syncAuthUI();},0);});
   async function markActive() {
     if(!session) return;
-    const {error}=await db.from('forum_profiles').update({last_seen_at:new Date().toISOString()}).eq('id',session.user.id);
+    const timestamp=new Date().toISOString();
+    const {error}=await db.from('forum_member_details').update({last_seen_at:timestamp}).eq('user_id',session.user.id);
     if(error) console.warn('Presence update failed:',error.message);
-    else if(profile) profile.last_seen_at=new Date().toISOString();
+    else if(profile) profile.last_seen_at=timestamp;
   }
+
   document.addEventListener('visibilitychange',()=>{if(!document.hidden) markActive();});
   window.addEventListener('focus',()=>markActive());
 
@@ -332,10 +338,16 @@
     $('formView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="cancelProfile" type="button">← Cancel</button><h2 style="margin-top:16px">Your profile</h2><form id="profileForm" class="forum-form"><label>Display name<input id="profileName" minlength="2" maxlength="32" required value="'+escapeHtml(profile.display_name)+'"></label><label>Avatar image URL<input id="profileAvatar" type="url" maxlength="500" value="'+escapeHtml(profile.avatar_url||'')+'" placeholder="https://…"></label><label>Short bio<textarea id="profileBio" maxlength="240">'+escapeHtml(profile.bio||'')+'</textarea></label><button class="forum-btn" type="submit">Save profile</button></form></div>';
     $('cancelProfile').addEventListener('click',showMain);
     $('profileForm').addEventListener('submit',async e=>{
-      e.preventDefault();const {error}=await db.from('forum_profiles').update({display_name:$('profileName').value.trim(),bio:$('profileBio').value.trim(),avatar_url:$('profileAvatar').value.trim()||null}).eq('id',session.user.id);
-      if(error){alert(error.message);return;}await loadProfile();await syncAuthUI();showMain();
+      e.preventDefault();
+      const displayName=$('profileName').value.trim();
+      const {error:detailsError}=await db.from('forum_member_details').update({bio:$('profileBio').value.trim(),avatar_url:$('profileAvatar').value.trim()||null}).eq('user_id',session.user.id);
+      if(detailsError){alert(detailsError.message);return;}
+      const {error:profileError}=await db.from('forum_profiles').update({display_name:displayName}).eq('id',session.user.id);
+      if(profileError){alert(profileError.message);return;}
+      await loadProfile();await syncAuthUI();showMain();
     });
   }
+
   function openReport(target) {
     if(!session){alert('Sign in to report content.');return;}
     hideViews();$('reportView').classList.remove('forum-hidden');
@@ -351,9 +363,17 @@
     hideViews();$('membersView').classList.remove('forum-hidden');
     $('membersView').innerHTML='<div class="forum-card"><button class="forum-btn secondary" id="closeMembers" type="button">← Back</button><h2 style="margin-top:16px">Member directory</h2><p class="forum-rules">Select a registered account to inspect its profile, activity and contribution record. Presence is updated automatically while a member has the forums open.</p><div id="membersList">Loading members…</div></div>';
     $('closeMembers').addEventListener('click',showMain);
-    const {data,error}=await db.from('forum_profiles').select('id,display_name,bio,role,avatar_url,last_seen_at,created_at').order('display_name');
+    const {data,error}=await db.from('forum_profiles').select('id,display_name,role,created_at').order('display_name');
     if(error){$('membersList').textContent=error.message;return;}
-    const members=data||[];
+    const ids=(data||[]).map(p=>p.id);
+    let details=[];
+    if(ids.length){
+      const {data:detailData,error:detailError}=await db.from('forum_member_details').select('user_id,bio,avatar_url,last_seen_at').in('user_id',ids);
+      if(detailError){$('membersList').textContent=detailError.message;return;}
+      details=detailData||[];
+    }
+    const detailMap=new Map(details.map(d=>[d.user_id,d]));
+    const members=(data||[]).map(p=>({...p,...(detailMap.get(p.id)||{bio:'',avatar_url:null,last_seen_at:null})}));
     $('membersList').innerHTML=members.map(p=>{
       const online=p.last_seen_at && (Date.now()-new Date(p.last_seen_at).getTime()<5*60*1000);
       const avatar=p.avatar_url?'<img class="forum-avatar" src="'+escapeHtml(p.avatar_url)+'" alt="">':'<div class="forum-avatar">'+escapeHtml((p.display_name||'?').slice(0,1).toUpperCase())+'</div>';
