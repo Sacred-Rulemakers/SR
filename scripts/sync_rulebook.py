@@ -74,7 +74,9 @@ def normalize_part_headings(lines):
                     and not re.match(r"^(BOOK|PART|SECTION|RULE)\\b", following, re.I)
                 )
                 if is_uppercase_continuation:
-                    title = (title + " " + following).strip()
+                    # Some headings split a word across adjacent paragraphs
+                    # (for example "OBJE" + "CTS AND POSSESSION").
+                    title = (title + following).strip() if title else following
                     index += 1
             line = (match.group(1) + " " + title).strip()
 
