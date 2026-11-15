@@ -171,7 +171,7 @@
       try { await loadProfile(); } catch(err) { console.error(err); }
       $('signedInName').textContent=profile?.display_name||session.user.email||'Member';
       $('signedInRole').textContent=' · '+(profile?.role||'Member');
-      $('staffPanel').classList.toggle('forum-hidden',!staff());
+      $('staffPanel').classList.toggle('forum-hidden',!staff());\n      $('membersButton').classList.toggle('forum-hidden',!['admin','owner'].includes(profile?.role));
     } else {
       profile=null;
       $('staffPanel').classList.add('forum-hidden');
