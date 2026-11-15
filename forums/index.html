@@ -221,14 +221,18 @@
     const {data,error}=await db.from('forum_threads').select('*,forum_categories(name),forum_profiles(display_name)').eq('id',id).maybeSingle();
     if(error||!data){alert(error?.message||'Discussion not found.');return;}
     selectedThread=data;
-    const {data:posts,error:postError}=await db.from('forum_posts').select('id,thread_id,author_id,body,is_deleted,created_at,updated_at,forum_profiles(display_name)').eq('thread_id',id).order('created_at');
+    const {data:posts,error:postError}=await db.from('forum_posts').select('id,thread_id,author_id,parent_post_id,body,is_deleted,created_at,updated_at,forum_profiles(display_name)').eq('thread_id',id).order('created_at');
     if(postError){alert(postError.message);return;}
+    const {data:reactions,error:reactionError}=await db.from('forum_post_reactions').select('post_id,user_id,reaction').in('post_id',(posts||[]).map(p=>p.id));
+    if(reactionError){alert(reactionError.message);return;}
+    const reactionRows=reactions||[];
+    const renderPost=(p,depth=0)=>'<article class="forum-post" style="margin-left:'+Math.min(depth,4)*18+'px"><div class="forum-meta">'+escapeHtml(p.forum_profiles?.display_name||'Member')+' · '+dateText(p.created_at)+'</div><div class="forum-post-body">'+(p.is_deleted?'[This reply has been removed.]':escapeHtml(p.body))+'</div><div class="forum-post-actions">'+(session&&!p.is_deleted?'<button class="forum-btn secondary" data-reply-post="'+p.id+'">Reply</button>':'')+(session&&session.user.id===p.author_id&&!p.is_deleted?'<button class="forum-btn secondary" data-edit-post="'+p.id+'">Edit</button>':'')+(session&&!p.is_deleted?'<button class="forum-btn secondary" data-report-post="'+p.id+'">Report</button>':'')+(staff()&&!p.is_deleted?'<button class="forum-btn danger" data-hide-post="'+p.id+'">Remove</button>':'')+['like','agree','thanks'].map(kind=>{const rows=reactionRows.filter(x=>x.post_id===p.id&&x.reaction===kind);const mine=session&&rows.some(x=>x.user_id===session.user.id);return '<button class="forum-btn secondary" data-react-post="'+p.id+'" data-reaction="'+kind+'">'+({like:'Like',agree:'Agree',thanks:'Thanks'}[kind])+' · '+rows.length+(mine?' ✓':'')+'</button>';}).join('')+'</div><div id="reply-box-'+p.id+'"></div>'+(posts.filter(x=>x.parent_post_id===p.id).map(child=>renderPost(child,depth+1)).join(''))+'</article>';
     hideViews();$('detailView').classList.remove('forum-hidden');
     const own=session&&session.user.id===data.author_id;
     const canEdit=own||staff();
     $('detailView').innerHTML=
       '<div class="forum-card"><button class="forum-btn secondary" id="backToThreads" type="button">← All discussions</button><div class="forum-detail-head" style="margin-top:17px"><div><div class="forum-meta">'+escapeHtml(data.forum_categories?.name||'')+' · '+escapeHtml(data.forum_profiles?.display_name||'Member')+' · '+dateText(data.created_at)+'</div><h2 style="font:400 29px/1.25 var(--serif);color:var(--green);margin:8px 0">'+escapeHtml(data.title)+'</h2></div></div><div class="forum-post-body">'+escapeHtml(data.body)+'</div><div class="forum-post-actions">'+(canEdit?'<button class="forum-btn secondary" id="editThread">Edit</button>':'')+(session?'<button class="forum-btn secondary" id="reportThread">Report</button>':'')+(staff()?'<button class="forum-btn secondary" id="toggleLock">'+(data.is_locked?'Unlock':'Lock')+'</button><button class="forum-btn secondary" id="togglePin">'+(data.is_pinned?'Unpin':'Pin')+'</button><button class="forum-btn danger" id="hideThread">Remove</button>':'')+'</div></div>'+
-      '<div class="forum-card"><h2>Replies ('+posts.length+')</h2><div id="postsList">'+(posts.length?posts.map(p=>'<article class="forum-post"><div class="forum-meta">'+escapeHtml(p.forum_profiles?.display_name||'Member')+' · '+dateText(p.created_at)+'</div><div class="forum-post-body">'+(p.is_deleted?'[This reply has been removed.]':escapeHtml(p.body))+'</div><div class="forum-post-actions">'+(session&&session.user.id===p.author_id&&!p.is_deleted?'<button class="forum-btn secondary" data-edit-post="'+p.id+'">Edit</button>':'')+(session&&!p.is_deleted?'<button class="forum-btn secondary" data-report-post="'+p.id+'">Report</button>':'')+(staff()&&!p.is_deleted?'<button class="forum-btn danger" data-hide-post="'+p.id+'">Remove</button>':'')+'</div></article>').join(''):'<p class="forum-small">No replies yet.</p>')+'</div></div>'+
+      '<div class="forum-card"><h2>Replies ('+posts.length+')</h2><div id="postsList">'+(posts.length?posts.filter(p=>!p.parent_post_id).map(p=>renderPost(p)).join(''):'<p class="forum-small">No replies yet.</p>')+'</div></div>'+
       (session&&!data.is_locked&&!data.is_deleted?'<div class="forum-card"><h2>Write a reply</h2><form id="replyForm" class="forum-form"><label>Your reply<textarea id="replyBody" maxlength="8000" required></textarea></label><button class="forum-btn" type="submit">Post reply</button></form></div>':data.is_locked?'<div class="forum-empty">This discussion is locked. New replies are closed.</div>':'');
     $('backToThreads').addEventListener('click',showMain);
     if($('editThread')) $('editThread').addEventListener('click',()=>openThreadForm(data));
@@ -238,13 +242,25 @@
     if($('hideThread')) $('hideThread').addEventListener('click',()=>moderateThread({is_deleted:true}));
     if($('replyForm')) $('replyForm').addEventListener('submit',submitReply);
     $('detailView').querySelectorAll('[data-edit-post]').forEach(b=>b.addEventListener('click',()=>editPost(b.dataset.editPost,posts)));
+    $('detailView').querySelectorAll('[data-reply-post]').forEach(b=>b.addEventListener('click',()=>{
+      const id=b.dataset.replyPost,box=$('reply-box-'+id);
+      box.innerHTML='<form class="forum-form inline-reply"><label>Reply<textarea maxlength="8000" required></textarea></label><div class="forum-row"><button class="forum-btn" type="submit">Post reply</button><button class="forum-btn secondary" type="button">Cancel</button></div></form>';
+      const form=box.querySelector('form');form.querySelector('button[type=button]').addEventListener('click',()=>box.innerHTML='');
+      form.addEventListener('submit',async e=>{e.preventDefault();const body=form.querySelector('textarea').value.trim();if(!body)return;const {error}=await db.from('forum_posts').insert({thread_id:selectedThread.id,parent_post_id:id,author_id:session.user.id,body});if(error){alert(error.message);return;}await openThread(selectedThread.id);});
+    }));
+    $('detailView').querySelectorAll('[data-react-post]').forEach(b=>b.addEventListener('click',async()=>{
+      const post_id=b.dataset.reactPost,reaction=b.dataset.reaction;
+      const existing=reactionRows.find(x=>x.post_id===post_id&&x.user_id===session.user.id&&x.reaction===reaction);
+      const result=existing?await db.from('forum_post_reactions').delete().eq('post_id',post_id).eq('user_id',session.user.id).eq('reaction',reaction):await db.from('forum_post_reactions').insert({post_id,user_id:session.user.id,reaction});
+      if(result.error){alert(result.error.message);return;}await openThread(selectedThread.id);
+    }));
     $('detailView').querySelectorAll('[data-report-post]').forEach(b=>b.addEventListener('click',()=>openReport({post_id:b.dataset.reportPost})));
     $('detailView').querySelectorAll('[data-hide-post]').forEach(b=>b.addEventListener('click',()=>hidePost(b.dataset.hidePost)));
   }
   async function submitReply(e) {
     e.preventDefault();
     const body=$('replyBody').value.trim();if(!body)return;
-    const {error}=await db.from('forum_posts').insert({thread_id:selectedThread.id,author_id:session.user.id,body});
+    const {error}=await db.from('forum_posts').insert({thread_id:selectedThread.id,parent_post_id:null,author_id:session.user.id,body});
     if(error){alert(error.message);return;} await openThread(selectedThread.id);
   }
   async function moderateThread(changes) {
