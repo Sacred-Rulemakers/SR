@@ -1,0 +1,11 @@
+{
+  "lastSyncedAt": "2026-11-15T20:45:07.365Z",
+  "sourceRevision": "initial-existing-website-data",
+  "counts": {
+    "books": 15,
+    "parts": 34,
+    "sections": 77,
+    "rules": 770
+  },
+  "forced": false
+}
