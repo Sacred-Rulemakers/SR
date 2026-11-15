@@ -8,30 +8,7 @@
 <link rel="stylesheet" href="../assets/sr.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
 
-<style>
-.forum-create-actions{display:flex;flex-wrap:wrap;gap:8px}
-.forum-sidebar-section{margin-top:24px;padding-top:20px;border-top:1px solid var(--line)}
-.forum-sidebar-section h2{font:400 20px/1.3 var(--serif);margin:0 0 12px}
-.forum-sidebar-list{display:grid;gap:4px;max-height:360px;overflow:auto}
-.forum-sidebar-link{display:grid;gap:3px;width:100%;padding:9px 8px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--green);text-align:left;font:13px/1.4 var(--sans);cursor:pointer;overflow-wrap:anywhere}
-.forum-sidebar-link:hover{background:var(--surface-hover)}
-.forum-sidebar-link small{font-size:10px;color:var(--muted)}
-.forum-icon-action{display:inline-flex;align-items:center;justify-content:center;gap:4px;min-width:28px;height:28px;padding:3px 5px;border:1px solid transparent;background:transparent;color:var(--muted);font:15px/1 var(--sans);cursor:pointer}
-.forum-icon-action small{font:10px/1 var(--sans);color:inherit}
-.forum-icon-action:hover,.forum-icon-action.is-active{background:var(--surface-soft);border-color:var(--line);color:var(--green)}
-.forum-icon-action.is-danger{color:var(--danger-text)}
-.forum-post-actions{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
-.participant-picker{display:grid;gap:10px;padding:16px;border:1px solid var(--line);background:var(--surface-soft)}
-.participant-picker h3{font:400 19px/1.3 var(--serif);margin:0;color:var(--green)}
-.participant-presets{display:flex;flex-wrap:wrap;gap:6px}
-.participant-presets .forum-btn{min-height:32px;padding:6px 10px;font-size:10px}
-.participant-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;max-height:220px;overflow:auto}
-.participant-option{display:flex;align-items:center;gap:8px;padding:7px 8px;background:var(--white);border:1px solid var(--line);font-size:12px}
-.participant-option input{min-height:0;width:15px;height:15px;padding:0}
-.participant-option small{margin-left:auto;color:var(--muted);font-size:10px}
-.forum-form-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
-@media(max-width:560px){.forum-create-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.participant-results{grid-template-columns:1fr}.forum-form-actions>*{flex:1}}
-</style></head>
+</head>
 <body>
 <div class="gold-rule"></div>
 <header class="site-header"><div class="head">
@@ -212,13 +189,14 @@
   }
   async function loadPersonalLists() {
     if(!session)return;
-    const [{data:mine,error:mineError},{data:members,error:memberError},{data:drafts,error:draftError}]=await Promise.all([
+    const [{data:mine,error:mineError},{data:members,error:memberError},{data:myPosts,error:postsError},{data:drafts,error:draftError}]=await Promise.all([
       db.from('forum_threads').select('id,author_id,title,updated_at').eq('author_id',session.user.id).eq('is_deleted',false),
       db.from('forum_thread_participants').select('thread_id').eq('user_id',session.user.id),
+      db.from('forum_posts').select('thread_id').eq('author_id',session.user.id).eq('is_deleted',false),
       db.from('forum_drafts').select('id,title,updated_at,thread_type').eq('author_id',session.user.id).order('updated_at',{ascending:false})
     ]);
-    if(mineError||memberError||draftError){$('yourDiscussions').innerHTML='<div class="forum-small">Unable to load your discussions.</div>';return;}
-    const ids=[...new Set([...(mine||[]).map(t=>t.id),...(members||[]).map(t=>t.thread_id)])];
+    if(mineError||memberError||postsError||draftError){$('yourDiscussions').innerHTML='<div class="forum-small">Unable to load your discussions.</div>';return;}
+    const ids=[...new Set([...(mine||[]).map(t=>t.id),...(members||[]).map(t=>t.thread_id),...(myPosts||[]).map(t=>t.thread_id)])];
     let joined=[];
     if(ids.length){const {data,error}=await db.from('forum_threads').select('id,title,updated_at').in('id',ids).eq('is_deleted',false);if(error){$('yourDiscussions').textContent=error.message;return;}joined=data||[];}
     joined.sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));
@@ -353,7 +331,7 @@
       if(error){alert(error.message);return;}await loadPersonalLists();showMain();
     });
     $('saveDraft').addEventListener('click',async()=>{
-      const values={author_id:session.user.id,thread_type:selectedType,title:$('threadTitle').value.trim(),body:$('threadBody').value.trim(),included_user_ids:[...selected]};
+      const values={author_id:session.user.id,thread_type:selectedType,title:$('threadTitle').value.trim(),body:$('threadBody').value.trim(),included_user_ids:[...selected],updated_at:new Date().toISOString()};
       const result=draft?await db.from('forum_drafts').update(values).eq('id',draft.id):await db.from('forum_drafts').insert(values);
       if(result.error){alert(result.error.message);return;}await loadPersonalLists();showMain();
     });
