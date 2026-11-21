@@ -1,11 +1,11 @@
 {
-  "lastSyncedAt": "2026-11-15T20:45:07.365Z",
-  "sourceRevision": "initial-existing-website-data",
+  "lastSyncedAt": "2026-11-21T16:00:00.000Z",
+  "sourceRevision": "manual-google-doc-copy",
   "counts": {
-    "books": 15,
-    "parts": 34,
-    "sections": 77,
-    "rules": 770
+    "books": 8,
+    "parts": 23,
+    "sections": 23,
+    "rules": 232
   },
-  "forced": false
+  "forced": true
 }
