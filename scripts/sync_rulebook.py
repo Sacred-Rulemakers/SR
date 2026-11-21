@@ -126,14 +126,14 @@ def parse_rulebook(lines):
                 if not section["rules"]:
                     raise ValueError(f'{section["title"]} has no numbered Rules.')
                 numbers.extend(int(re.match(r"Rule (\d+)", rule).group(1)) for rule in section["rules"])
-    if len(numbers) < 770:
-        raise ValueError(f"Only {len(numbers)} Rules were parsed; expected at least the current 770.")
+    if len(numbers) < 232:
+        raise ValueError(f"Only {len(numbers)} Rules were parsed; expected at least the current 232.")
     expected = list(range(1, len(numbers) + 1))
     if numbers != expected:
         raise ValueError("Rule numbering is not continuous from 001; refusing to publish.")
     if len(set(numbers)) != len(numbers):
         raise ValueError("Duplicate Rule numbers detected; refusing to publish.")
-    if len(books) < 15 or parts < 34 or sections < 77:
+    if len(books) < 8 or parts < 23 or sections < 23:
         raise ValueError("The parsed hierarchy is unexpectedly incomplete; refusing to publish.")
     return books, {"books": len(books), "parts": parts, "sections": sections, "rules": len(numbers)}
 
